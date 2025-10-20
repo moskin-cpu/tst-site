@@ -81,7 +81,7 @@
     <button id="reset-button">Reset Game</button>
 
     <script>
-        const cells = document.querySelectorAll('.cell');
+        let cells; // Declare globally, but populate within startGame()
         const messageDisplay = document.getElementById('message');
         const resetButton = document.getElementById('reset-button');
         
@@ -105,10 +105,13 @@
             gameActive = true;
             currentPlayer = 'X';
             messageDisplay.textContent = `Player ${currentPlayer}'s turn`;
+            
+            cells = document.querySelectorAll('.cell'); // Crucial: Re-populate 'cells' here
+
             cells.forEach(cell => {
                 cell.textContent = '';
                 cell.classList.remove('x', 'o');
-                // Re-add event listener without 'once: true' to ensure it's always active
+                // Re-add event listener to ensure it's always active
                 cell.removeEventListener('click', handleCellClick); // Remove existing to prevent duplicates
                 cell.addEventListener('click', handleCellClick);
             });
@@ -133,7 +136,7 @@
             }
 
             if (!board.includes('')) {
-                messageDisplay.textContent = 'It's a draw!';
+                messageDisplay.textContent = 'It\'s a draw!';
                 gameActive = false;
                 return;
             }
@@ -192,7 +195,7 @@
                 }
 
                 if (!board.includes('')) {
-                    messageDisplay.textContent = 'It's a draw!';
+                    messageDisplay.textContent = 'It\'s a draw!';
                     gameActive = false;
                     return;
                 }
@@ -216,7 +219,7 @@
                     }
 
                     if (!board.includes('')) {
-                        messageDisplay.textContent = 'It's a draw!';
+                        messageDisplay.textContent = 'It\'s a draw!';
                         gameActive = false;
                         return;
                     }
@@ -229,11 +232,14 @@
         let scores = {\n            X: -1,\n            O: 1,\n            tie: 0\n        };\n
         function minimax(currentBoard, depth, isMaximizing) {
             if (checkWinnerForMinimax(currentBoard, 'O')) {
-                return scores.O;\n            } else if (checkWinnerForMinimax(currentBoard, 'X')) {\n                return scores.X;\n            } else if (!currentBoard.includes('')) {\n                return scores.tie;\n            }\n
-            if (isMaximizing) {\n                let bestScore = -Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {\n                        currentBoard[i] = 'O';\n                        let score = minimax(currentBoard, depth + 1, false);\n                        currentBoard[i] = '';\n                        bestScore = Math.max(score, bestScore);\n                    }
+                return scores.O;\n            } else if (checkWinnerForMinimax(currentBoard, 'X')) {
+                return scores.X;\n            } else if (!currentBoard.includes('')) {
+                return scores.tie;\n            }\n
+            if (isMaximizing) {\n                let bestScore = -Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'O';\n                        let score = minimax(currentBoard, depth + 1, false);\n                        currentBoard[i] = '';\n                        bestScore = Math.max(score, bestScore);\n                    }
                 }\n                return bestScore;
-            } else {\n                let bestScore = Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {\n                        currentBoard[i] = 'X';\n                        let score = minimax(currentBoard, depth + 1, true);\n                        currentBoard[i] = '';\n                        bestScore = Math.min(score, bestScore);
-                    }
+            } else {\n                let bestScore = Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'X';\n                        let score = minimax(currentBoard, depth + 1, true);\n                        currentBoard[i] = '';\n                        bestScore = Math.min(score, bestScore);\n                    }
                 }\n                return bestScore;
             }
         }\n
