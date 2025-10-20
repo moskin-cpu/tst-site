@@ -123,20 +123,19 @@
             const clickedCell = event.target;
             // Only process clicks on elements that are cells
             if (clickedCell.classList.contains('cell') && clickedCell.dataset.index) {
-                handlePlayerMove(event); // Pass the event to the original handler
+                const clickedCellIndex = parseInt(clickedCell.dataset.index);
+                // Pass the actual cell element and its index directly to handlePlayerMove
+                handlePlayerMove(clickedCell, clickedCellIndex);
             }
         }
 
-        function handlePlayerMove(event) {
-            const clickedCell = event.target;
-            const clickedCellIndex = parseInt(clickedCell.dataset.index);
-
+        function handlePlayerMove(cellElement, clickedCellIndex) { // Now accepts cellElement and index directly
             if (gameBoard[clickedCellIndex] !== '' || !isGameActive) {
                 return;
             }
 
             gameBoard[clickedCellIndex] = currentPlayer;
-            clickedCell.textContent = currentPlayer;
+            cellElement.textContent = currentPlayer; // Use the passed cellElement
 
             if (checkWin(gameBoard, currentPlayer)) {
                 messageElement.textContent = `Player ${currentPlayer} wins!`;
