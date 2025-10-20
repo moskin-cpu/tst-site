@@ -104,16 +104,31 @@ function handleAIMove() {
 function getBestAIMove() {
     let bestScore = -Infinity;
     let move = -1;
+    let availableMoves = [];
 
+    // Find all available moves first
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
-            board[i] = "O"; // Try AI's move
-            let score = minimax(board, 0, true); // Corrected: AI is the maximizing player
-            board[i] = ""; // Undo move
-            if (score > bestScore) {
-                bestScore = score;
-                move = i;
-            }
+            availableMoves.push(i);
+        }
+    }
+
+    if (availableMoves.length === 0) {
+        return -1; // Should not happen if game is running
+    }
+
+    // Default to the first available move as a fallback
+    move = availableMoves[0];
+
+    // Now, run minimax to find the optimal move
+    for (let i = 0; i < availableMoves.length; i++) {
+        const currentMove = availableMoves[i];
+        board[currentMove] = "O"; // Try AI's move
+        let score = minimax(board, 0, true); // AI is maximizing player
+        board[currentMove] = ""; // Undo move
+        if (score > bestScore) {
+            bestScore = score;
+            move = currentMove;
         }
     }
     return move;
