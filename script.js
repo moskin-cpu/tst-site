@@ -108,7 +108,7 @@ function getBestAIMove() {
     for (let i = 0; i < board.length; i++) {
         if (board[i] === "") {
             board[i] = "O"; // Try AI's move
-            let score = minimax(board, 0, false);
+            let score = minimax(board, 0, true); // Corrected: AI is the maximizing player
             board[i] = ""; // Undo move
             if (score > bestScore) {
                 bestScore = score;
