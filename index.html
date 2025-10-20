@@ -108,9 +108,10 @@
             cells.forEach(cell => {
                 cell.textContent = '';
                 cell.classList.remove('x', 'o');
+                // Re-add event listener without 'once: true' to ensure it's always active
+                cell.removeEventListener('click', handleCellClick); // Remove existing to prevent duplicates
+                cell.addEventListener('click', handleCellClick);
             });
-            // Ensure click listeners are active (they should be from initial setup, but good to ensure)
-            cells.forEach(cell => cell.addEventListener('click', handleCellClick, { once: true }));
         }
 
         function handleCellClick(event) {
@@ -124,7 +125,6 @@
             board[clickedCellIndex] = currentPlayer;
             clickedCell.textContent = currentPlayer;
             clickedCell.classList.add(currentPlayer.toLowerCase());
-            clickedCell.removeEventListener('click', handleCellClick); // Remove listener after move
             
             if (checkWinner()) {
                 messageDisplay.textContent = `Player ${currentPlayer} has won!`;
@@ -184,7 +184,6 @@
                 board[bestMove] = 'O';
                 cells[bestMove].textContent = 'O';
                 cells[bestMove].classList.add('o');
-                cells[bestMove].removeEventListener('click', handleCellClick); // Remove listener after AI move
 
                 if (checkWinner()) {
                     messageDisplay.textContent = 'Player O has won!';
@@ -209,10 +208,9 @@
                     board[randomMove] = 'O';
                     cells[randomMove].textContent = 'O';
                     cells[randomMove].classList.add('o');
-                    cells[randomMove].removeEventListener('click', handleCellClick); 
 
                     if (checkWinner()) {
-                        messageDisplay.textContent = 'Player O has won!';';
+                        messageDisplay.textContent = 'Player O has won!';
                         gameActive = false;
                         return;
                     }
@@ -229,7 +227,9 @@
         }
 
         let scores = {\n            X: -1,\n            O: 1,\n            tie: 0\n        };\n
-        function minimax(currentBoard, depth, isMaximizing) {\n            if (checkWinnerForMinimax(currentBoard, 'O')) {\n                return scores.O;\n            } else if (checkWinnerForMinimax(currentBoard, 'X')) {\n                return scores.X;\n            } else if (!currentBoard.includes('')) {\n                return scores.tie;\n            }\n
+        function minimax(currentBoard, depth, isMaximizing) {
+            if (checkWinnerForMinimax(currentBoard, 'O')) {
+                return scores.O;\n            } else if (checkWinnerForMinimax(currentBoard, 'X')) {\n                return scores.X;\n            } else if (!currentBoard.includes('')) {\n                return scores.tie;\n            }\n
             if (isMaximizing) {\n                let bestScore = -Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {\n                        currentBoard[i] = 'O';\n                        let score = minimax(currentBoard, depth + 1, false);\n                        currentBoard[i] = '';\n                        bestScore = Math.max(score, bestScore);\n                    }
                 }\n                return bestScore;
             } else {\n                let bestScore = Infinity;\n                for (let i = 0; i < currentBoard.length; i++) {\n                    if (currentBoard[i] === '') {\n                        currentBoard[i] = 'X';\n                        let score = minimax(currentBoard, depth + 1, true);\n                        currentBoard[i] = '';\n                        bestScore = Math.min(score, bestScore);
@@ -237,7 +237,8 @@
                 }\n                return bestScore;
             }
         }\n
-        function checkWinnerForMinimax(boardToCheck, player) {\n            for (let i = 0; i < winningConditions.length; i++) {\n                const winCondition = winningConditions[i];\n                let a = boardToCheck[winCondition[0]];\n                let b = boardToCheck[winCondition[1]];\n                let c = boardToCheck[winCondition[2]];\n                if (a === player && b === player && c === player) {\n                    return true;\n                }\n            }\n            return false;\n        }\n\n        // Initialize game on load and attach reset listener\n        document.addEventListener('DOMContentLoaded', startGame);
+        function checkWinnerForMinimax(boardToCheck, player) {\n            for (let i = 0; i < winningConditions.length; i++) {\n                const winCondition = winningConditions[i];\n                let a = boardToCheck[winCondition[0]];\n                let b = boardToCheck[winCondition[1]];\n                let c = boardToCheck[winCondition[2]];\n                if (a === player && b === player && c === player) {\n                    return true;\n                }\n            }\n            return false;\n        }\n
+        // Initialize game on load and attach reset listener\n        document.addEventListener('DOMContentLoaded', startGame);
         resetButton.addEventListener('click', startGame);
     </script>
 </body>
