@@ -66,8 +66,6 @@
         }
 
         function moveSnake() {
-            if (changingDirection) return; // Prevent multiple direction changes in one frame
-
             const head = { x: snake[0].x, y: snake[0].y };
 
             switch (direction) {
@@ -121,8 +119,9 @@
             const goingLeft = direction === 'left';
             const goingRight = direction === 'right';
 
-            // Set changingDirection flag to true, it will be reset in moveSnake
-            changingDirection = true;
+            if (changingDirection) return; // Ignore key presses if a direction change is pending
+
+            changingDirection = true; // Set flag to true to indicate a change is being processed
 
             if (keyPressed === 37 && !goingRight) { // Left arrow
                 direction = 'left';
