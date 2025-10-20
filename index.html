@@ -3,14 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic-Tac-Toe Unbeatable AI</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #282c34;
+            color: #ffffff;
+            margin: 0;
+        }
+
+        .game-container {
+            text-align: center;
+            background-color: #3a3f47;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            color: #61dafb;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            width: 315px;
+            height: 315px;
+            margin: 20px auto;
+            background-color: #61dafb;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #4a4f59;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            color: #ffffff;
+            transition: background-color 0.2s ease;
+        }
+
+        .cell:hover {
+            background-color: #5a606b;
+        }
+
+        .game-status {
+            margin-top: 15px;
+            font-size: 1.2em;
+            color: #61dafb;
+        }
+
+        #restartButton {
+            background-color: #61dafb;
+            color: #282c34;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s ease;
+        }
+
+        #restartButton:hover {
+            background-color: #38b4da;
+        }
+    </style>
 </head>
 <body>
-    <h1>Tic-Tac-Toe</h1>
-    <div id="game-container">
-        <div id="status">Player X's Turn</div>
-        <div id="board">
+    <div class="game-container">
+        <h1>Tic Tac Toe</h1>
+        <div class="board" id="gameBoard">
             <div class="cell" data-cell-index="0"></div>
             <div class="cell" data-cell-index="1"></div>
             <div class="cell" data-cell-index="2"></div>
@@ -21,8 +96,179 @@
             <div class="cell" data-cell-index="7"></div>
             <div class="cell" data-cell-index="8"></div>
         </div>
-        <button id="reset-button">Reset Game</button>
+        <div class="game-status" id="gameStatus"></div>
+        <button id="restartButton">Restart Game</button>
     </div>
-    <script src="script.js"></script>
+
+    <script>
+        const cells = document.querySelectorAll('.cell');
+        const gameStatus = document.getElementById('gameStatus');
+        const restartButton = document.getElementById('restartButton');
+
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        let isGameActive = true;
+
+        const winningConditions = [
+            [0, 1, 2],
+            [3, 4, 5],
+            [6, 7, 8],
+            [0, 3, 6],
+            [1, 4, 7],
+            [2, 5, 8],
+            [0, 4, 8],
+            [2, 4, 6]
+        ];
+
+        function handleResultValidation() {
+            let roundWon = false;
+            for (let i = 0; i < winningConditions.length; i++) {
+                const winCondition = winningConditions[i];
+                let a = board[winCondition[0]];
+                let b = board[winCondition[1]];
+                let c = board[winCondition[2]];
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                if (a === b && b === c) {
+                    roundWon = true;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                gameStatus.innerHTML = `Player ${currentPlayer} has won!`;
+                isGameActive = false;
+                return;
+            }
+
+            if (!board.includes('')) {
+                gameStatus.innerHTML = `Game ended in a draw!`;
+                isGameActive = false;
+                return;
+            }
+
+            changePlayer();
+        }
+
+        function changePlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            gameStatus.innerHTML = `It's ${currentPlayer}'s turn`;
+            if (isGameActive && currentPlayer === 'O') {
+                setTimeout(handleAIMove, 500);
+            }
+        }
+
+        function handleCellClick(clickedCellEvent) {
+            const clickedCell = clickedCellEvent.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
+
+            if (board[clickedCellIndex] !== '' || !isGameActive || currentPlayer === 'O') {
+                return;
+            }
+
+            board[clickedCellIndex] = currentPlayer;
+            clickedCell.innerHTML = currentPlayer;
+            handleResultValidation();
+        }
+
+        function handleAIMove() {
+            if (!isGameActive) return;
+
+            let bestScore = -Infinity;
+            let move = -1;
+
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    if (score > bestScore) {
+                        bestScore = score;
+                        move = i;
+                    }
+                }
+            }
+
+            if (move !== -1) {
+                board[move] = 'O';
+                cells[move].innerHTML = 'O';
+                handleResultValidation();
+            }
+        }
+
+        let scores = {
+            X: -10,
+            O: 10,
+            tie: 0
+        };
+
+        function minimax(currentBoard, depth, isMaximizing) {
+            let result = checkWinner(currentBoard);
+            if (result !== null) {
+                return scores[result] - depth;
+            }
+
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < currentBoard.length; i++) {
+                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'O';
+                        let score = minimax(currentBoard, depth + 1, false);
+                        currentBoard[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < currentBoard.length; i++) {
+                    if (currentBoard[i] === '') {
+                        currentBoard[i] = 'X';
+                        let score = minimax(currentBoard, depth + 1, true);
+                        currentBoard[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        function checkWinner(currentBoard) {
+            for (let i = 0; i < winningConditions.length; i++) {
+                const winCondition = winningConditions[i];
+                let a = currentBoard[winCondition[0]];
+                let b = currentBoard[winCondition[1]];
+                let c = currentBoard[winCondition[2]];
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                if (a === b && b === c) {
+                    return a;
+                }
+            }
+
+            if (!currentBoard.includes('')) {
+                return 'tie';
+            }
+
+            return null;
+        }
+
+        function restartGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            isGameActive = true;
+            gameStatus.innerHTML = `It's ${currentPlayer}'s turn`;
+            cells.forEach(cell => {
+                cell.innerHTML = '';
+            });
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        restartButton.addEventListener('click', restartGame);
+
+        gameStatus.innerHTML = `It's ${currentPlayer}'s turn`;
+    </script>
 </body>
 </html>
