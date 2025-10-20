@@ -77,9 +77,10 @@
         let gameBoard = ['', '', '', '', '', '', '', '', ''];
         let currentPlayer = PLAYER_X;
         let isGameActive = true;
-        let cells = []; // Declare globally
+        let cells = []; // Will store references to cell elements for AI to update
         let messageElement;
         let resetButton;
+        let gameBoardElement; // Reference to the game board container
 
         const winningCombinations = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
@@ -88,7 +89,7 @@
         ];
 
         function initializeGame() {
-            const gameBoardElement = document.getElementById('game-board');
+            gameBoardElement = document.getElementById('game-board');
             gameBoardElement.innerHTML = ''; // Clear previous cells
 
             gameBoard = ['', '', '', '', '', '', '', '', ''];
@@ -104,15 +105,25 @@
                 const cell = document.createElement('div');
                 cell.classList.add('cell');
                 cell.dataset.index = i;
-                cell.addEventListener('click', handlePlayerMove); // Attach listener immediately
                 gameBoardElement.appendChild(cell);
-                cells.push(cell); // Add to the global cells array
+                cells.push(cell); // Add to the global cells array for AI updates
             }
             
-            // Re-attach reset button listener to prevent multiple listeners if initializeGame is called again
+            // Remove existing event listener to prevent duplicates if initializeGame is called multiple times
+            gameBoardElement.removeEventListener('click', handleBoardClick);
+            gameBoardElement.addEventListener('click', handleBoardClick);
+
             if (resetButton) {
-                resetButton.removeEventListener('click', initializeGame); // Remove old listener if exists
+                resetButton.removeEventListener('click', initializeGame);
                 resetButton.addEventListener('click', initializeGame);
+            }
+        }
+
+        function handleBoardClick(event) {
+            const clickedCell = event.target;
+            // Only process clicks on elements that are cells
+            if (clickedCell.classList.contains('cell') && clickedCell.dataset.index) {
+                handlePlayerMove(event); // Pass the event to the original handler
             }
         }
 
