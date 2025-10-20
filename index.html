@@ -77,7 +77,7 @@
         let gameBoard = ['', '', '', '', '', '', '', '', ''];
         let currentPlayer = PLAYER_X;
         let isGameActive = true;
-        let cells = [];
+        let cells = []; // Declare globally
         let messageElement;
         let resetButton;
 
@@ -89,7 +89,8 @@
 
         function initializeGame() {
             const gameBoardElement = document.getElementById('game-board');
-            gameBoardElement.innerHTML = '';
+            gameBoardElement.innerHTML = ''; // Clear previous cells
+
             gameBoard = ['', '', '', '', '', '', '', '', ''];
             currentPlayer = PLAYER_X;
             isGameActive = true;
@@ -97,15 +98,22 @@
             resetButton = document.getElementById('reset-button');
             messageElement.textContent = `Player ${currentPlayer}'s turn`;
 
+            cells = []; // Clear the global cells array on initialization
+
             for (let i = 0; i < 9; i++) {
                 const cell = document.createElement('div');
                 cell.classList.add('cell');
                 cell.dataset.index = i;
+                cell.addEventListener('click', handlePlayerMove); // Attach listener immediately
                 gameBoardElement.appendChild(cell);
+                cells.push(cell); // Add to the global cells array
             }
-            cells = document.querySelectorAll('.cell');
-            cells.forEach(cell => cell.addEventListener('click', handlePlayerMove));
-            resetButton.addEventListener('click', initializeGame);
+            
+            // Re-attach reset button listener to prevent multiple listeners if initializeGame is called again
+            if (resetButton) {
+                resetButton.removeEventListener('click', initializeGame); // Remove old listener if exists
+                resetButton.addEventListener('click', initializeGame);
+            }
         }
 
         function handlePlayerMove(event) {
