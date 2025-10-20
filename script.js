@@ -1,8 +1,6 @@
 const board = document.getElementById('board');
 const cells = document.querySelectorAll('.cell');
 const statusDisplay = document.getElementById('status');
-const restartButton = document.getElementById('restartButton');
-
 let gameActive = true;
 let currentPlayer = 'X';
 let gameState = ['', '', '', '', '', '', '', '', ''];
@@ -55,82 +53,7 @@ function handlePlayerChange() {
     statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
 }
 
-function makeAIMove() {
-    if (!gameActive) return;
-
-    // Minimax algorithm for unbeatable AI
-    function findBestMove() {
-        let bestVal = -Infinity;
-        let bestMove = -1;
-
-        for (let i = 0; i < gameState.length; i++) {
-            if (gameState[i] === '') {
-                gameState[i] = 'O'; // Try AI's move
-                let moveVal = minimax(gameState, 0, false);
-                gameState[i] = ''; // Undo the move
-                if (moveVal > bestVal) {
-                    bestVal = moveVal;
-                    bestMove = i;
-                }
-            }
-        }
-        return bestMove;
-    }
-
-    function minimax(boardState, depth, isMaximizingPlayer) {
-        let score = evaluate(boardState);
-
-        if (score === 10) return score - depth;
-        if (score === -10) return score + depth;
-        if (!boardState.includes('')) return 0; // Draw
-
-        if (isMaximizingPlayer) {
-            let best = -Infinity;
-            for (let i = 0; i < boardState.length; i++) {
-                if (boardState[i] === '') {
-                    boardState[i] = 'O';
-                    best = Math.max(best, minimax(boardState, depth + 1, !isMaximizingPlayer));
-                    boardState[i] = '';
-                }
-            }
-            return best;
-        } else {
-            let best = Infinity;
-            for (let i = 0; i < boardState.length; i++) {
-                if (boardState[i] === '') {
-                    boardState[i] = 'X';
-                    best = Math.min(best, minimax(boardState, depth + 1, !isMaximizingPlayer));
-                    boardState[i] = '';
-                }
-            }
-            return best;
-        }
-    }
-
-    function evaluate(boardState) {
-        for (let i = 0; i < winningConditions.length; i++) {
-            const [a, b, c] = winningConditions[i];
-            if (boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-                if (boardState[a] === 'O') return 10;
-                else if (boardState[a] === 'X') return -10;
-            }
-        }
-        return 0;
-    }
-
-    const bestMove = findBestMove();
-    if (bestMove !== -1) {
-        gameState[bestMove] = 'O';
-        cells[bestMove].innerHTML = 'O';
-        cells[bestMove].classList.add('playerO');
-        if (!handleResultValidation()) {
-            handlePlayerChange();
-        }
-    }
-}
-
-
-function handleClick(clickedCellEvent) {
+function handleCellClick(clickedCellEvent) {
     const clickedCell = clickedCellEvent.target;
     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
@@ -140,7 +63,6 @@ function handleClick(clickedCellEvent) {
 
     gameState[clickedCellIndex] = currentPlayer;
     clickedCell.innerHTML = currentPlayer;
-    clickedCell.classList.add(`player${currentPlayer}`);
 
     if (handleResultValidation()) {
         return;
@@ -148,9 +70,89 @@ function handleClick(clickedCellEvent) {
 
     handlePlayerChange();
 
-    if (currentPlayer === 'O') {
-        makeAIMove();
+    if (currentPlayer === 'O' && gameActive) {
+        setTimeout(handleAIMove, 500); // AI makes a move after a short delay
     }
+}
+
+function handleAIMove() {
+    let bestScore = -Infinity;
+    let move;
+    for (let i = 0; i < gameState.length; i++) {
+        if (gameState[i] === '') {
+            gameState[i] = 'O';
+            let score = minimax(gameState, 0, false);
+            gameState[i] = '';
+            if (score > bestScore) {
+                bestScore = score;
+                move = i;
+            }
+        }
+    }
+    gameState[move] = 'O';
+    document.querySelector(`[data-cell-index="${move}"]`).innerHTML = 'O';
+
+    if (handleResultValidation()) {
+        return;
+    }
+
+    handlePlayerChange();
+}
+
+let scores = {
+    'X': -10,
+    'O': 10,
+    'tie': 0
+};
+
+function minimax(newGameState, depth, isMaximizing) {
+    let result = checkWinner(newGameState);
+    if (result !== null) {
+        return scores[result];
+    }
+
+    if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < newGameState.length; i++) {
+            if (newGameState[i] === '') {
+                newGameState[i] = 'O';
+                let score = minimax(newGameState, depth + 1, false);
+                newGameState[i] = '';
+                bestScore = Math.max(score, bestScore);
+            }
+        }
+        return bestScore;
+    } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < newGameState.length; i++) {
+            if (newGameState[i] === '') {
+                newGameState[i] = 'X';
+                let score = minimax(newGameState, depth + 1, true);
+                newGameState[i] = '';
+                bestScore = Math.min(score, bestScore);
+            }
+        }
+        return bestScore;
+    }
+}
+
+function checkWinner(board) {
+    for (let i = 0; i < winningConditions.length; i++) {
+        const winCondition = winningConditions[i];
+        let a = board[winCondition[0]];
+        let b = board[winCondition[1]];
+        let c = board[winCondition[2]];
+        if (a === '' || b === '' || c === '') {
+            continue;
+        }
+        if (a === b && b === c) {
+            return a;
+        }
+    }
+    if (!board.includes('')) {
+        return 'tie';
+    }
+    return null;
 }
 
 function handleRestartGame() {
@@ -158,12 +160,9 @@ function handleRestartGame() {
     currentPlayer = 'X';
     gameState = ['', '', '', '', '', '', '', '', ''];
     statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
-    cells.forEach(cell => {
-        cell.innerHTML = '';
-        cell.classList.remove('playerX', 'playerO');
-    });
+    cells.forEach(cell => cell.innerHTML = '');
 }
 
-cells.forEach(cell => cell.addEventListener('click', handleClick));
-restartButton.addEventListener('click', handleRestartGame);
+cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+document.querySelector('.game-restart').addEventListener('click', handleRestartGame);
 statusDisplay.innerHTML = `It's ${currentPlayer}'s turn`;
