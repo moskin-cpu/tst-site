@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,29 +8,21 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="background-globe"></div>
-
-    <div id="main-menu" class="container">
-        <h1>Choose Your Celebrity Jet</h1>
-        <div class="celebrity-selection">
-            <button class="celebrity-button" data-celebrity="Elon Musk">Elon Musk</button>
-            <button class="celebrity-button" data-celebrity="Jeff Bezos">Jeff Bezos</button>
-            <button class="celebrity-button" data-celebrity="Bill Gates">Bill Gates</button>
-            <!-- Add more celebrity buttons here -->
+    <div class="background-gif"></div>
+    <div class="container">
+        <div id="menu-container" class="menu-container">
+            <h1>Choose Your Celebrity Jet</h1>
+            <button class="celebrity-button">Elon Musk</button>
+            <button class="celebrity-button">Jeff Bezos</button>
+            <button class="celebrity-button">Bill Gates</button>
+        </div>
+        <div id="tracker-container" class="tracker-container">
+            <div id="boarding-pass-container">
+                <!-- Boarding pass will be displayed here -->
+            </div>
+            <button id="back-to-menu" class="back-button">Back to Menu</button>
         </div>
     </div>
-
-    <div id="jet-tracker-view" class="container hidden">
-        <button id="back-to-menu">Back to Menu</button>
-        <h2>Tracking <span id="current-celebrity"></span>'s Jet</h2>
-        <div id="boarding-pass-container">
-            <!-- Boarding passes will be loaded here by JavaScript -->
-        </div>
-        <div id="globe-map">
-            <!-- Pins will be added here by JavaScript -->
-        </div>
-    </div>
-
     <script src="script.js"></script>
 </body>
 </html>
