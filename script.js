@@ -1,119 +1,91 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const mainMenu = document.getElementById('main-menu');
-    const jetTrackerView = document.getElementById('jet-tracker-view');
-    const celebrityButtons = document.querySelectorAll('.celebrity-button');
-    const backToMenuButton = document.getElementById('back-to-menu');
-    const currentCelebritySpan = document.getElementById('current-celebrity');
-    const boardingPassContainer = document.getElementById('boarding-pass-container');
-    const globeMap = document.getElementById('globe-map');
-
-    const celebrityData = {
-        'Elon Musk': {
-            jet: 'Gulfstream G650ER',
-            registration: 'N628TS',
-            airline: 'SpaceX Air',
-            origin: { city: 'Austin, TX', latitude: 30.2672, longitude: -97.7431 },
-            destination: { city: 'New York, NY', latitude: 40.7128, longitude: -74.0060 },
-            departureTime: '10:00 AM PST',
-            arrivalTime: '02:30 PM EST',
-            gate: 'A12',
-            seat: '1A'
-        },
-        'Jeff Bezos': {
-            jet: 'Gulfstream G650ER',
-            registration: 'N750BJ',
-            airline: 'Blue Origin Air',
-            origin: { city: 'Seattle, WA', latitude: 47.6062, longitude: -122.3321 },
-            destination: { city: 'London, UK', latitude: 51.5074, longitude: 0.1278 },
-            departureTime: '09:00 AM PST',
-            arrivalTime: '05:00 PM GMT',
-            gate: 'B05',
-            seat: '2B'
-        },
-        'Bill Gates': {
-            jet: 'Bombardier Global 6000',
-            registration: 'N194WM',
-            airline: 'Gates Ventures',
-            origin: { city: 'Redmond, WA', latitude: 47.6740, longitude: -122.1215 },
-            destination: { city: 'Paris, FR', latitude: 48.8566, longitude: 2.3522 },
-            departureTime: '11:30 AM PST',
-            arrivalTime: '07:30 PM CET',
-            gate: 'C03',
-            seat: '3C'
-        }
-    };
-
-    function showJetTrackerView(celebrityName) {
-        mainMenu.classList.add('hidden');
-        jetTrackerView.classList.remove('hidden');
-        currentCelebritySpan.textContent = celebrityName;
-        boardingPassContainer.innerHTML = ''; // Clear previous boarding passes
-        globeMap.innerHTML = ''; // Clear previous pins
-
-        const data = celebrityData[celebrityName];
-        if (data) {
-            createBoardingPass(data);
-            addPinsToGlobe(data.origin, data.destination);
-        } else {
-            boardingPassContainer.innerHTML = '<p>No data available for ' + celebrityName + '</p>';
-        }
-    }
-
-    function createBoardingPass(data) {
-        const boardingPassHtml = `
-            <div class="boarding-pass">
-                <h3>${data.airline}</h3>
-                <p><strong>Passenger:</strong> ${currentCelebritySpan.textContent}</p>
-                <p><strong>Jet:</strong> ${data.jet} (${data.registration})</p>
-                <p><strong>From:</strong> ${data.origin.city}</p>
-                <p><strong>To:</strong> ${data.destination.city}</p>
-                <p><strong>Departure:</strong> ${data.departureTime}</p>
-                <p><strong>Arrival:</strong> ${data.arrivalTime}</p>
-                <p><strong>Gate:</strong> ${data.gate} | <strong>Seat:</strong> ${data.seat}</p>
-                <div class="barcode"></div>
-            </div>
-        `;
-        boardingPassContainer.innerHTML = boardingPassHtml;
-    }
-
-    // Simple function to map latitude/longitude to a percentage for pin placement on a flat map image
-    function getPinPosition(latitude, longitude) {
-        // These are very rough approximations for a general globe image
-        // A real implementation would require a proper map library (e.g., Leaflet, OpenLayers, Google Maps API)
-        const latPercent = ((90 - latitude) / 180) * 100;
-        const lonPercent = ((180 + longitude) / 360) * 100;
-        return { top: latPercent, left: lonPercent };
-    }
-
-    function addPinsToGlobe(origin, destination) {
-        // Origin Pin
-        const originPos = getPinPosition(origin.latitude, origin.longitude);
-        const originPin = document.createElement('div');
-        originPin.className = 'map-pin origin';
-        originPin.style.top = `${originPos.top}%`;
-        originPin.style.left = `${originPos.left}%`;
-        originPin.setAttribute('data-location', `Origin: ${origin.city}`);
-        globeMap.appendChild(originPin);
-
-        // Destination Pin
-        const destPos = getPinPosition(destination.latitude, destination.longitude);
-        const destPin = document.createElement('div');
-        destPin.className = 'map-pin destination';
-        destPin.style.top = `${destPos.top}%`;
-        destPin.style.left = `${destPos.left}%`;
-        destPin.setAttribute('data-location', `Destination: ${destination.city}`);
-        globeMap.appendChild(destPin);
-    }
-
-    celebrityButtons.forEach(button => {
-        button.addEventListener('click', (event) => {
-            const celebrityName = event.target.dataset.celebrity;
-            showJetTrackerView(celebrityName);
-        });
-    });
-
-    backToMenuButton.addEventListener('click', () => {
-        jetTrackerView.classList.add('hidden');
-        mainMenu.classList.remove('hidden');
-    });
+    showMenu(); // Show the menu when the page loads
 });
+
+const celebrityData = {
+    'elon': {
+        name: 'Elon Musk',
+        image: 'https://cdn.cnn.com/cnnnext/dam/assets/220202161405-02-elon-musk-file-full-169.jpg',
+        origin: 'Los Angeles, USA',
+        destination: 'Austin, USA',
+        flightNumber: 'SPX001',
+        gate: 'A12',
+        seat: '1A',
+        departureTime: '14:30 PST',
+        arrivalTime: '19:00 CST',
+        departureCoordinates: { lat: 34.0522, lng: -118.2437 },
+        destinationCoordinates: { lat: 30.2672, lng: -97.7431 }
+    },
+    'jeff': {
+        name: 'Jeff Bezos',
+        image: 'https://image.cnbcfm.com/api/v1/image/107064376-1653066986689-gettyimages-1240899071-AFP_32AN8J6.jpeg?v=1653067041&w=1920&h=1080',
+        origin: 'Seattle, USA',
+        destination: 'New York, USA',
+        flightNumber: 'AMZ007',
+        gate: 'B03',
+        seat: '2C',
+        departureTime: '10:00 PST',
+        arrivalTime: '18:30 EST',
+        departureCoordinates: { lat: 47.6062, lng: -122.3321 },
+        destinationCoordinates: { lat: 40.7128, lng: -74.0060 }
+    },
+    'bill': {
+        name: 'Bill Gates',
+        image: 'https://www.biography.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cg_face%2Cq_auto:good%2Cw_300/MTY4MzI4MjMxOTU4Mjc1MTk4/bill-gates-jr-with-microsoft-logo-and-tagline-in-background.jpg',
+        origin: 'Bimini, Bahamas',
+        destination: 'London, UK',
+        flightNumber: 'MSF003',
+        gate: 'C01',
+        seat: '3B',
+        departureTime: '08:00 EST',
+        arrivalTime: '20:00 GMT',
+        departureCoordinates: { lat: 25.7337, lng: -79.2638 },
+        destinationCoordinates: { lat: 51.5074, lng: -0.1278 }
+    }
+};
+
+function showMenu() {
+    document.getElementById('main-menu').style.display = 'flex';
+    document.getElementById('jet-tracker-view').style.display = 'none';
+}
+
+function showTracker(celebrity) {
+    document.getElementById('main-menu').style.display = 'none';
+    document.getElementById('jet-tracker-view').style.display = 'block';
+
+    const data = celebrityData[celebrity];
+    if (!data) {
+        console.error('Celebrity data not found for:', celebrity);
+        return;
+    }
+
+    document.getElementById('celeb-image').src = data.image;
+    document.getElementById('celeb-name').textContent = data.name;
+    document.getElementById('origin').textContent = data.origin;
+    document.getElementById('destination').textContent = data.destination;
+    document.getElementById('flight-number').textContent = data.flightNumber;
+    document.getElementById('gate').textContent = data.gate;
+    document.getElementById('seat').textContent = data.seat;
+    document.getElementById('departure-time').textContent = data.departureTime;
+    document.getElementById('arrival-time').textContent = data.arrivalTime;
+
+    // Update map pins
+    const map = document.getElementById('globe-map');
+    map.innerHTML = ''; // Clear previous pins
+
+    // Origin pin
+    const originPin = document.createElement('div');
+    originPin.className = 'map-pin origin-pin';
+    originPin.style.setProperty('--lat', data.departureCoordinates.lat);
+    originPin.style.setProperty('--lng', data.departureCoordinates.lng);
+    originPin.title = `Origin: ${data.origin}`;
+    map.appendChild(originPin);
+
+    // Destination pin
+    const destPin = document.createElement('div');
+    destPin.className = 'map-pin destination-pin';
+    destPin.style.setProperty('--lat', data.destinationCoordinates.lat);
+    destPin.style.setProperty('--lng', data.destinationCoordinates.lng);
+    destPin.title = `Destination: ${data.destination}`;
+    map.appendChild(destPin);
+}
