@@ -8,32 +8,28 @@
 </head>
 <body>
     <div class="container">
-        <h1>Bill Gates's Jet Tracker</h1>
-        <div class="tracker-content">
+        <h1>Bill Gates Jet Tracker</h1>
+        <div class="tracker-info">
             <div class="boarding-pass">
                 <h2>Boarding Pass</h2>
                 <p><strong>Passenger:</strong> Bill Gates</p>
-                <p><strong>Flight:</strong> BGX100</p>
-                <p><strong>From:</strong> Seattle (SEA)</p>
-                <p><strong>To:</strong> San Francisco (SFO)</p>
-                <p><strong>Departure:</strong> 11:00 AM PST</p>
-                <p><strong>Arrival:</strong> 1:00 PM PST</p>
-                <p><strong>Status:</strong> Landed</p>
+                <p><strong>Flight:</strong> N887WM</p>
+                <p><strong>Origin:</strong> Seattle (SEA)</p>
+                <p><strong>Destination:</strong> San Francisco (SFO)</p>
+                <p><strong>Departure:</strong> 2023-10-26 09:30 AM PST</p>
+                <p><strong>Arrival:</strong> 2023-10-26 11:00 AM PST</p>
             </div>
-            <div class="globe-container">
-                <img src="https://media.giphy.com/media/xT39DjT50C85c18QBG/giphy.gif" alt="Globe" class="globe-gif">
-                <div class="map-pins">
-                    <!-- Origin -->
-                    <a href="https://www.google.com/maps/search/Seattle-Tacoma+International+Airport" target="_blank" class="pin origin" style="top: 60%; left: 15%;"></a>
-                    <!-- Destination -->
-                    <a href="https://www.google.com/maps/search/San+Francisco+International+Airport" target="_blank" class="pin destination" style="top: 75%; left: 10%;"></a>
-                    <!-- Current Position (Simulated) -->
-                    <a href="https://www.google.com/maps/search/Portland+International+Airport" target="_blank" class="pin current" style="top: 68%; left: 12%;"></a>
+            <div class="map">
+                <h2>Live Map</h2>
+                <div class="map-placeholder">
+                    <img src="https://i.ibb.co/wz17J7F/elonmuskjet.gif" alt="Map of Bill Gates' Jet" style="width:100%; height:auto;">
+                    <a href="https://www.google.com/maps/search/?api=1&query=Seattle-Tacoma+International+Airport" target="_blank" class="map-pin origin" style="left: 20%; top: 40%;"></a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=Current+Location+of+N887WM" target="_blank" class="map-pin current" style="left: 60%; top: 55%;"></a>
+                    <a href="https://www.google.com/maps/search/?api=1&query=San+Francisco+International+Airport" target="_blank" class="map-pin destination" style="left: 85%; top: 70%;"></a>
                 </div>
             </div>
         </div>
-        <button onclick="window.location.href='index.html'">Back to Main Page</button>
+        <a href="index.html" class="button">Back to Main Page</a>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
