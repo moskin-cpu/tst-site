@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elon Musk Jet Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-globe"></div>
+    <div id="app">
+        <div id="tracker" class="container">
+            <button class="back-button" onclick="window.location.href='index.html'">Back to Menu</button>
+            <h2>Elon Musk Jet Tracker</h2>
+            <div class="boarding-pass">
+                <h3>Boarding Pass</h3>
+                <p><strong>Passenger:</strong> Elon Musk</p>
+                <p><strong>From:</strong> Hawthorne, CA (HHR)</p>
+                <p><strong>To:</strong> Austin, TX (AUS)</p>
+                <p><strong>Flight:</strong> N628TS</p>
+                <p><strong>Status:</strong> In Flight</p>
+            </div>
+            <div class="globe-map-container">
+                <img src="https://www.flaticon.com/svg/vts/svg/10577/10577242.svg" alt="Globe Map" class="globe-map-image">
+                <div class="pin departure" style="--lat: 33.9205; --lon: -118.3323;" data-location="Hawthorne, CA"></div>
+                <div class="pin destination" style="--lat: 30.1975; --lon: -97.6664;" data-location="Austin, TX"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
