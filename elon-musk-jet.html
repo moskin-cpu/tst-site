@@ -3,37 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elon Musk Jet Tracker</title>
+    <title>Elon Musk's Jet Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Elon Musk's Jet Tracker</h1>
-        <div class="tracker-content">
-            <div class="boarding-pass">
-                <h2>Boarding Pass</h2>
-                <p><strong>Passenger:</strong> Elon Musk</p>
-                <p><strong>Flight:</strong> SNXXXX</p>
-                <p><strong>From:</strong> Los Angeles (LAX)</p>
-                <p><strong>To:</strong> Austin (AUS)</p>
-                <p><strong>Departure:</strong> 10:00 AM PST</p>
-                <p><strong>Arrival:</strong> 3:00 PM CST</p>
-                <p><strong>Status:</strong> In-flight</p>
+        <h1>Elon Musk's Jet</h1>
+
+        <div class="boarding-pass">
+            <h2>Boarding Pass</h2>
+            <div class="boarding-pass-detail">
+                <strong>FLIGHT:</strong> <span>SPACEX001</span>
             </div>
-            <div class="globe-container">
-                <img src="https://media.giphy.com/media/xT39DjT50C85c18QBG/giphy.gif" alt="Globe" class="globe-gif">
-                <div class="map-pins">
-                    <!-- Origin -->
-                    <a href="https://www.google.com/maps/search/Los+Angeles+International+Airport" target="_blank" class="pin origin" style="top: 65%; left: 20%;"></a>
-                    <!-- Destination -->
-                    <a href="https://www.google.com/maps/search/Austin-Bergstrom+International+Airport" target="_blank" class="pin destination" style="top: 50%; left: 50%;"></a>
-                    <!-- Current Position (Simulated) -->
-                    <a href="https://www.google.com/maps/search/Denver" target="_blank" class="pin current" style="top: 40%; left: 35%;"></a>
-                </div>
+            <div class="boarding-pass-detail">
+                <strong>PASSENGER:</strong> <span>Elon Musk</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>FROM:</strong> <span>Los Angeles (LAX)</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>TO:</strong> <span>Berlin (BER)</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>GATE:</strong> <span>42A</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>SEAT:</strong> <span>1A</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>DEPARTURE:</strong> <span>10:00 AM PST</span>
             </div>
         </div>
-        <button onclick="window.location.href='index.html'">Back to Main Page</button>
+
+        <div class="map-container">
+            <div class="map-overlay"></div>
+            <!-- Example pins with Google Maps links -->
+            <a href="https://www.google.com/maps/search/?api=1&query=Los+Angeles+International+Airport" target="_blank" class="map-pin origin elon-origin" title="Origin: Los Angeles (LAX)"></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Mid-Atlantic+Ocean" target="_blank" class="map-pin elon-current" title="Current Location: Mid-Atlantic Ocean"></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Berlin+Brandenburg+Airport" target="_blank" class="map-pin destination elon-destination" title="Destination: Berlin (BER)"></a>
+        </div>
+
+        <a href="index.html" class="button" style="margin-top: 20px;">Back to Main Page</a>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
