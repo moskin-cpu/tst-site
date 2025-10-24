@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bill Gates Jet Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="background-globe"></div>
+    <div id="app">
+        <div id="tracker" class="container">
+            <button class="back-button" onclick="window.location.href='index.html'">Back to Menu</button>
+            <h2>Bill Gates Jet Tracker</h2>
+            <div class="boarding-pass">
+                <h3>Boarding Pass</h3>
+                <p><strong>Passenger:</strong> Bill Gates</p>
+                <p><strong>From:</strong> Seattle, WA (BFI)</p>
+                <p><strong>To:</strong> Palm Springs, CA (PSP)</p>
+                <p><strong>Flight:</strong> N887WM</p>
+                <p><strong>Status:</strong> In Flight</p>
+            </div>
+            <div class="globe-map-container">
+                <img src="https://www.flaticon.com/svg/vts/svg/10577/10577242.svg" alt="Globe Map" class="globe-map-image">
+                <div class="pin departure" style="--lat: 47.6062; --lon: -122.3321;" data-location="Seattle, WA"></div>
+                <div class="pin destination" style="--lat: 33.8252; --lon: -116.5053;" data-location="Palm Springs, CA"></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
