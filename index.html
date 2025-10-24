@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elon Jet Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="boarding-pass">
+        <header>
+            <h1>Elon Jet Tracker</h1>
+            <div class="flight-info">
+                <p>FLIGHT</p>
+                <p class="flight-number">SPX-2025</p>
+            </div>
+        </header>
+        <section class="passenger-details">
+            <div class="name">
+                <p>PASSENGER NAME</p>
+                <p class="value">ELON MUSK</p>
+            </div>
+            <div class="from">
+                <p>FROM</p>
+                <p class="value" id="departure-airport">Loading...</p>
+            </div>
+            <div class="to">
+                <p>TO</p>
+                <p class="value" id="arrival-airport">Loading...</p>
+            </div>
+        </section>
+        <section class="flight-details">
+            <div class="gate">
+                <p>GATE</p>
+                <p class="value">A01</p>
+            </div>
+            <div class="seat">
+                <p>SEAT</p>
+                <p class="value">1A</p>
+            </div>
+            <div class="time">
+                <p>DEPARTURE</p>
+                <p class="value" id="departure-time">Loading...</p>
+            </div>
+        </section>
+        <section class="qr-code">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=ElonJetTracker" alt="QR Code">
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
