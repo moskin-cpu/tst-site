@@ -1,0 +1,101 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+    margin: 0;
+}
+
+.boarding-pass {
+    background-color: #fff;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    width: 350px;
+    padding: 30px;
+    color: #333;
+    position: relative;
+    overflow: hidden;
+}
+
+.boarding-pass::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 10px;
+    background-color: #007bff;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+header h1 {
+    font-size: 24px;
+    margin: 0;
+    color: #007bff;
+}
+
+.flight-info p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.flight-info .flight-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+}
+
+.passenger-details,
+.flight-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.passenger-details > div,
+.flight-details > div {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.passenger-details p,
+.flight-details p {
+    margin: 0;
+    font-size: 11px;
+    color: #999;
+}
+
+.passenger-details .value,
+.flight-details .value {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
+}
+
+.passenger-details .name {
+    grid-column: span 2;
+}
+
+.qr-code {
+    text-align: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px dashed #ddd;
+}
+
+.qr-code img {
+    max-width: 100px;
+    height: auto;
+}
