@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,19 +7,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="background-gif"></div>
     <div class="container">
-        <div id="menu-container" class="menu-container">
+        <div id="menu" class="menu-container">
             <h1>Choose Your Celebrity Jet</h1>
-            <button class="celebrity-button">Elon Musk</button>
-            <button class="celebrity-button">Jeff Bezos</button>
-            <button class="celebrity-button">Bill Gates</button>
-        </div>
-        <div id="tracker-container" class="tracker-container">
-            <div id="boarding-pass-container">
-                <!-- Boarding pass will be displayed here -->
+            <div class="button-group">
+                <a href="tracker.html?celebrity=elon" class="menu-button">Elon Musk</a>
+                <a href="tracker.html?celebrity=jeff" class="menu-button">Jeff Bezos</a>
+                <a href="tracker.html?celebrity=bill" class="menu-button">Bill Gates</a>
             </div>
-            <button id="back-to-menu" class="back-button">Back to Menu</button>
         </div>
     </div>
     <script src="script.js"></script>
