@@ -3,37 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeff Bezos Jet Tracker</title>
+    <title>Jeff Bezos's Jet Tracker</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Jeff Bezos's Jet Tracker</h1>
-        <div class="tracker-content">
-            <div class="boarding-pass">
-                <h2>Boarding Pass</h2>
-                <p><strong>Passenger:</strong> Jeff Bezos</p>
-                <p><strong>Flight:</strong> BZ747</p>
-                <p><strong>From:</strong> Seattle (SEA)</p>
-                <p><strong>To:</strong> Washington D.C. (IAD)</p>
-                <p><strong>Departure:</strong> 08:00 AM PST</p>
-                <p><strong>Arrival:</strong> 4:00 PM EST</p>
-                <p><strong>Status:</strong> In-flight</p>
+        <h1>Jeff Bezos's Jet</h1>
+
+        <div class="boarding-pass">
+            <h2>Boarding Pass</h2>
+            <div class="boarding-pass-detail">
+                <strong>FLIGHT:</strong> <span>BLUEORIGIN001</span>
             </div>
-            <div class="globe-container">
-                <img src="https://media.giphy.com/media/xT39DjT50C85c18QBG/giphy.gif" alt="Globe" class="globe-gif">
-                <div class="map-pins">
-                    <!-- Origin -->
-                    <a href="https://www.google.com/maps/search/Seattle-Tacoma+International+Airport" target="_blank" class="pin origin" style="top: 60%; left: 15%;"></a>
-                    <!-- Destination -->
-                    <a href="https://www.google.com/maps/search/Washington+Dulles+International+Airport" target="_blank" class="pin destination" style="top: 55%; left: 80%;"></a>
-                    <!-- Current Position (Simulated) -->
-                    <a href="https://www.google.com/maps/search/Dallas/Fort+Worth+International+Airport" target="_blank" class="pin current" style="top: 45%; left: 45%;"></a>
-                </div>
+            <div class="boarding-pass-detail">
+                <strong>PASSENGER:</strong> <span>Jeff Bezos</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>FROM:</strong> <span>Seattle (SEA)</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>TO:</strong> <span>London (LHR)</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>GATE:</strong> <span>B23</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>SEAT:</strong> <span>1A</span>
+            </div>
+            <div class="boarding-pass-detail">
+                <strong>DEPARTURE:</strong> <span>08:00 AM PST</span>
             </div>
         </div>
-        <button onclick="window.location.href='index.html'">Back to Main Page</button>
+
+        <div class="map-container">
+            <div class="map-overlay"></div>
+            <!-- Example pins with Google Maps links -->
+            <a href="https://www.google.com/maps/search/?api=1&query=Seattle+Tacoma+International+Airport" target="_blank" class="map-pin origin jeff-origin" title="Origin: Seattle (SEA)"></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=Over+Canada" target="_blank" class="map-pin jeff-current" title="Current Location: Over Canada"></a>
+            <a href="https://www.google.com/maps/search/?api=1&query=London+Heathrow+Airport" target="_blank" class="map-pin destination jeff-destination" title="Destination: London (LHR)"></a>
+        </div>
+
+        <a href="index.html" class="button" style="margin-top: 20px;">Back to Main Page</a>
     </div>
-    <script src="script.js"></script>
 </body>
 </html>
