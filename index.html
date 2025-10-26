@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plants vs. Zombies Clone</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Plants vs. Zombies Clone</h1>
     <div id="game-container">
-        <!-- Game elements will be dynamically loaded here -->
+        <div id="sidebar">
+            <h2>Plants</h2>
+            <div id="plant-selection">
+                <!-- Plant cards will be dynamically created here -->
+            </div>
+            <div id="sun-count">Suns: 0</div>
+        </div>
+        <div id="game-board">
+            <!-- Game grid will be dynamically created here -->
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
