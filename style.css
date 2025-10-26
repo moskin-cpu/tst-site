@@ -1,19 +1,48 @@
 body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #333;
-    color: #eee;
     font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    background-color: #f0f0f0;
+}
+
+h1 {
+    color: #333;
 }
 
 #game-container {
-    width: 800px; /* Example width */
-    height: 600px; /* Example height */
+    display: grid;
+    grid-template-columns: repeat(9, 60px); /* 9 columns for the game board */
+    grid-template-rows: repeat(5, 60px); /* 5 rows for the game board */
     border: 2px solid green;
-    background-color: #555;
+    background-color: #a0f0a0;
+    width: 540px; /* 9 * 60px */
+    height: 300px; /* 5 * 60px */
     position: relative;
     overflow: hidden;
+}
+
+.plant, .zombie {
+    width: 60px;
+    height: 60px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: absolute;
+}
+
+.sun {
+    width: 40px;
+    height: 40px;
+    background-color: yellow;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.8em;
+    font-weight: bold;
+    color: #333;
 }
