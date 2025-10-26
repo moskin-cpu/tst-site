@@ -1,48 +1,83 @@
+
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     margin: 0;
-    background-color: #f0f0f0;
-}
-
-h1 {
-    color: #333;
-}
-
-#game-container {
-    display: grid;
-    grid-template-columns: repeat(9, 60px); /* 9 columns for the game board */
-    grid-template-rows: repeat(5, 60px); /* 5 rows for the game board */
-    border: 2px solid green;
-    background-color: #a0f0a0;
-    width: 540px; /* 9 * 60px */
-    height: 300px; /* 5 * 60px */
-    position: relative;
-    overflow: hidden;
-}
-
-.plant, .zombie {
-    width: 60px;
-    height: 60px;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    position: absolute;
-}
-
-.sun {
-    width: 40px;
-    height: 40px;
-    background-color: yellow;
-    border-radius: 50%;
-    position: absolute;
-    cursor: pointer;
+    font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0.8em;
+    min-height: 100vh;
+    background-color: #f0f0f0;
+}
+
+#game-container {
+    display: flex;
+    border: 2px solid #333;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+
+#sidebar {
+    width: 200px;
+    padding: 10px;
+    background-color: #eee;
+    border-right: 1px solid #ccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#sidebar h2 {
+    margin-top: 0;
+}
+
+#plant-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.plant-card {
+    border: 1px solid #ccc;
+    padding: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.plant-card.selected {
+    background-color: #d4edda;
+    border-color: #28a745;
+}
+
+#sun-count {
+    font-size: 1.2em;
     font-weight: bold;
-    color: #333;
+}
+
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(9, 60px); /* 9 columns for the game board */
+    grid-template-rows: repeat(5, 60px); /* 5 rows for the game board */
+    border: 1px solid #ccc;
+}
+
+.cell {
+    width: 60px;
+    height: 60px;
+    border: 1px solid #eee;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    background-color: #a0d468; /* Grass color */
+}
+
+.plant, .zombie {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
 }
