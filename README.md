@@ -1,1 +1,1 @@
-Welcome to tst-site!
+This is a test repository for a Plants vs. Zombies clone.
