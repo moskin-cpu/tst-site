@@ -4,60 +4,59 @@ const answerButtonsElement = document.getElementById('answer-buttons');
 const nextButton = document.getElementById('next-button');
 const feedbackElement = document.getElementById('feedback');
 
+let questions = [];
 let currentQuestionIndex = 0;
 let score = 0;
-let questions = [];
 let missedQuestions = [];
+let originalQuestions = []; // To store the full list of questions for initial play
 
-async function startQuiz() {
+// Function to fetch questions from JSON
+async function fetchQuestions() {
     try {
         const response = await fetch('questions.json');
-        questions = await response.json();
-        shuffleArray(questions); // Shuffle questions for a random order
-        currentQuestionIndex = 0;
-        score = 0;
-        missedQuestions = [];
-        nextButton.classList.add('hide');
-        feedbackElement.classList.add('hide');
-        showQuestion();
+        originalQuestions = await response.json();
+        startGame(originalQuestions);
     } catch (error) {
         console.error('Error fetching questions:', error);
-        questionElement.innerText = 'Error loading quiz questions. Please try again later.';
+        questionElement.innerText = 'Error loading quiz. Please try again later.';
     }
 }
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
+function startGame(qList) {
+    questions = [...qList]; // Copy questions for current game session
+    currentQuestionIndex = 0;
+    score = 0;
+    missedQuestions = [];
+    nextButton.classList.add('hide');
+    feedbackElement.classList.add('hide');
+    nextButton.removeEventListener('click', reviewNextQuestionHandler); // Ensure only one handler is active
+    nextButton.addEventListener('click', nextQuestionHandler); // Add original handler
+    showQuestion();
 }
 
 function showQuestion() {
     resetState();
-    if (questions.length === 0) {
-        questionElement.innerText = 'No questions available.';
-        return;
+    if (currentQuestionIndex < questions.length) {
+        let currentQuestion = questions[currentQuestionIndex];
+        questionElement.innerText = currentQuestion.question;
+        currentQuestion.options.forEach(option => {
+            const button = document.createElement('button');
+            button.innerText = option;
+            button.classList.add('btn');
+            if (option === currentQuestion.correct_answer) {
+                button.dataset.correct = true;
+            }
+            button.addEventListener('click', selectAnswer);
+            answerButtonsElement.appendChild(button);
+        });
+    } else {
+        endGame();
     }
-    const currentQuestion = questions[currentQuestionIndex];
-    questionElement.innerText = currentQuestion.question;
-
-    currentQuestion.answers.forEach(answer => {
-        const button = document.createElement('button');
-        button.innerText = answer.text;
-        button.classList.add('btn');
-        if (answer.correct) {
-            button.dataset.correct = answer.correct;
-        }
-        button.addEventListener('click', selectAnswer);
-        answerButtonsElement.appendChild(button);
-    });
 }
 
 function resetState() {
-    clearStatusClass(document.body);
+    clearFeedback();
     nextButton.classList.add('hide');
-    feedbackElement.classList.add('hide');
     while (answerButtonsElement.firstChild) {
         answerButtonsElement.removeChild(answerButtonsElement.firstChild);
     }
@@ -66,22 +65,21 @@ function resetState() {
 function selectAnswer(e) {
     const selectedButton = e.target;
     const correct = selectedButton.dataset.correct === 'true';
-
-    if (correct) {
-        score++;
-        feedbackElement.innerText = 'Correct!';
-        feedbackElement.style.color = 'green';
-    } else {
-        feedbackElement.innerText = 'Wrong!';
-        feedbackElement.style.color = 'red';
-        missedQuestions.push(questions[currentQuestionIndex]);
-    }
-    feedbackElement.classList.remove('hide');
-
     Array.from(answerButtonsElement.children).forEach(button => {
         setStatusClass(button, button.dataset.correct === 'true');
         button.removeEventListener('click', selectAnswer); // Disable further clicks
     });
+
+    if (correct) {
+        // Score is only incremented on initial attempt. No score for review.
+        if (questions === originalQuestions) { // Check if we are in the initial game run
+            score++;
+        }
+        showFeedback('Correct!', 'correct');
+    } else {
+        showFeedback('Wrong! The correct answer was: ' + questions[currentQuestionIndex].correct_answer, 'wrong');
+        missedQuestions.push(questions[currentQuestionIndex]);
+    }
 
     nextButton.classList.remove('hide');
 }
@@ -100,31 +98,61 @@ function clearStatusClass(element) {
     element.classList.remove('wrong');
 }
 
-nextButton.addEventListener('click', () => {
+function showFeedback(message, type) {
+    feedbackElement.innerText = message;
+    feedbackElement.classList.remove('hide');
+    feedbackElement.classList.remove('correct', 'wrong');
+    feedbackElement.classList.add(type);
+}
+
+function nextQuestionHandler() {
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        showQuestion();
+    } else if (missedQuestions.length > 0) {
+        startReviewMissedQuestions();
+    } else {
+        endGame();
+    }
+}
+
+function startReviewMissedQuestions() {
+    alert('Time to review your missed questions!');
+    questions = [...missedQuestions]; // Now "questions" array holds only missed questions
+    currentQuestionIndex = 0;
+    missedQuestions = []; // Reset for potential new misses during review
+    
+    nextButton.removeEventListener('click', nextQuestionHandler); // Remove original handler
+    nextButton.addEventListener('click', reviewNextQuestionHandler); // Add review handler
+    showQuestion(); // Start showing missed questions
+}
+
+function reviewNextQuestionHandler() {
     currentQuestionIndex++;
     if (currentQuestionIndex < questions.length) {
         showQuestion();
     } else {
-        // All initial questions answered, now tackle missed questions
+        // If all "missed questions" (now in 'questions' array) are answered, check if any were missed again.
         if (missedQuestions.length > 0) {
-            questions = [...missedQuestions]; // Set questions to only the missed ones
-            shuffleArray(questions); // Shuffle missed questions
-            missedQuestions = []; // Clear for the next round of missed questions
-            currentQuestionIndex = 0;
-            alert('Time to review missed questions!');
-            showQuestion();
+            startReviewMissedQuestions(); // Re-review newly missed questions
         } else {
-            endQuiz();
+            endGame(); // All questions answered correctly
         }
     }
-});
-
-function endQuiz() {
-    questionElement.innerText = `Quiz Finished! You scored ${score} out of ${questions.length + missedQuestions.length} questions initially presented!`;
-    answerButtonsElement.classList.add('hide');
-    nextButton.classList.add('hide');
-    feedbackElement.classList.add('hide');
-    // alert(`Quiz Finished! Your final score is ${score}!`);
 }
 
-startQuiz();
+function endGame() {
+    resetState();
+    questionElement.innerText = `Quiz Finished! You got ${score} out of ${originalQuestions.length} questions correct in your initial attempt.`;
+    nextButton.classList.add('hide');
+    feedbackElement.classList.add('hide');
+    
+    const restartButton = document.createElement('button');
+    restartButton.innerText = 'Restart Quiz';
+    restartButton.classList.add('btn');
+    restartButton.addEventListener('click', () => startGame(originalQuestions)); // Restart from original questions
+    answerButtonsElement.appendChild(restartButton);
+}
+
+// Initial fetch to start the game
+fetchQuestions();
