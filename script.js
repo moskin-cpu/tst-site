@@ -6,53 +6,39 @@ const feedbackElement = document.getElementById('feedback');
 
 let currentQuestionIndex = 0;
 let score = 0;
-let questions = []; // This will be populated from the document later
+let questions = [];
 let missedQuestions = [];
 
-// Placeholder for questions for now
-// In a real scenario, this would be fetched from a document or API
-const dummyQuestions = [
-    {
-        question: 'What is the capital of France?',
-        answers: [
-            { text: 'Berlin', correct: false },
-            { text: 'Madrid', correct: false },
-            { text: 'Paris', correct: true },
-            { text: 'Rome', correct: false }
-        ]
-    },
-    {
-        question: 'What is 2 + 2?',
-        answers: [
-            { text: '3', correct: false },
-            { text: '4', correct: true },
-            { text: '5', correct: false },
-            { text: '6', correct: false }
-        ]
-    },
-    {
-        question: 'Which planet is known as the Red Planet?',
-        answers: [
-            { text: 'Earth', correct: false },
-            { text: 'Mars', correct: true },
-            { text: 'Jupiter', correct: false },
-            { text: 'Venus', correct: false }
-        ]
+async function startQuiz() {
+    try {
+        const response = await fetch('questions.json');
+        questions = await response.json();
+        shuffleArray(questions); // Shuffle questions for a random order
+        currentQuestionIndex = 0;
+        score = 0;
+        missedQuestions = [];
+        nextButton.classList.add('hide');
+        feedbackElement.classList.add('hide');
+        showQuestion();
+    } catch (error) {
+        console.error('Error fetching questions:', error);
+        questionElement.innerText = 'Error loading quiz questions. Please try again later.';
     }
-];
+}
 
-function startQuiz() {
-    questions = [...dummyQuestions]; // Use dummy questions for now
-    currentQuestionIndex = 0;
-    score = 0;
-    missedQuestions = [];
-    nextButton.classList.add('hide');
-    feedbackElement.classList.add('hide');
-    showQuestion();
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
 }
 
 function showQuestion() {
     resetState();
+    if (questions.length === 0) {
+        questionElement.innerText = 'No questions available.';
+        return;
+    }
     const currentQuestion = questions[currentQuestionIndex];
     questionElement.innerText = currentQuestion.question;
 
@@ -121,7 +107,8 @@ nextButton.addEventListener('click', () => {
     } else {
         // All initial questions answered, now tackle missed questions
         if (missedQuestions.length > 0) {
-            questions = [...missedQuestions];
+            questions = [...missedQuestions]; // Set questions to only the missed ones
+            shuffleArray(questions); // Shuffle missed questions
             missedQuestions = []; // Clear for the next round of missed questions
             currentQuestionIndex = 0;
             alert('Time to review missed questions!');
@@ -133,11 +120,11 @@ nextButton.addEventListener('click', () => {
 });
 
 function endQuiz() {
-    questionElement.innerText = `Quiz Finished! You scored ${score} out of ${dummyQuestions.length + (missedQuestions.length > 0 ? missedQuestions.length : 0)}!`;
+    questionElement.innerText = `Quiz Finished! You scored ${score} out of ${questions.length + missedQuestions.length} questions initially presented!`;
     answerButtonsElement.classList.add('hide');
     nextButton.classList.add('hide');
     feedbackElement.classList.add('hide');
-    alert(`Quiz Finished! Your final score is ${score}!`);
+    // alert(`Quiz Finished! Your final score is ${score}!`);
 }
 
 startQuiz();
