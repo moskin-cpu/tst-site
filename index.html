@@ -1,13 +1,704 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AP Stats — Adaptive Learn Mode</title>
+  <style>
+    :root{--bg:#0b1020;--panel:#121a31;--panel-2:#182344;--text:#eef2ff;--muted:#b6c2e3;--accent:#7aa2ff;--good:#2ecc71;--bad:#ff6b6b;--border:#2c3963;--warn:#f0a500;--purple:#a78bfa;}
+    *{box-sizing:border-box;}
+    body{margin:0;font-family:Inter,system-ui,-apple-system,sans-serif;background:linear-gradient(180deg,#08101e 0%,#0b1020 100%);color:var(--text);min-height:100vh;}
+    .wrap{max-width:980px;margin:0 auto;padding:28px 18px 40px;}
+    .hero{display:grid;gap:6px;margin-bottom:18px;}
+    h1{margin:0;font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.05;}
+    .sub{color:var(--muted);font-size:.95rem;}
+    .panel{background:rgba(18,26,49,.95);border:1px solid var(--border);border-radius:22px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.28);backdrop-filter:blur(10px);}
+    .topbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:14px;}
+    .stats{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+    .pill{padding:7px 12px;border-radius:999px;background:var(--panel-2);border:1px solid var(--border);color:var(--muted);font-size:.88rem;white-space:nowrap;}
+    .controls{display:flex;gap:8px;flex-wrap:wrap;}
+    button,select{appearance:none;border:1px solid var(--border);border-radius:14px;background:#1a264a;color:var(--text);padding:10px 14px;font:inherit;cursor:pointer;}
+    button:hover,select:hover{filter:brightness(1.08);}
+    button:disabled{opacity:.5;cursor:not-allowed;}
+    .mastery-row{display:flex;gap:10px;align-items:center;margin-bottom:6px;}
+    .mastery-label{font-size:.9rem;color:var(--muted);white-space:nowrap;}
+    .mastery-count{font-size:1rem;font-weight:700;color:var(--good);}
+    .progress-track{flex:1;height:10px;background:#0f1730;border:1px solid var(--border);border-radius:999px;overflow:hidden;}
+    .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,#2ecc71,#55e898);transition:width .4s ease;}
+    .progress-fill.learning-mode{background:linear-gradient(90deg,#5b8cff,#8fafff);}
+    .state-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+    .state-chip{font-size:.75rem;padding:3px 9px;border-radius:999px;border:1px solid;}
+    .sc-new{background:rgba(44,57,99,.5);border-color:#2c3963;color:var(--muted);}
+    .sc-learning{background:rgba(255,107,107,.1);border-color:rgba(255,107,107,.4);color:#ff9a9a;}
+    .sc-familiar{background:rgba(240,165,0,.1);border-color:rgba(240,165,0,.4);color:#f0c060;}
+    .sc-pending{background:rgba(167,139,250,.1);border-color:rgba(167,139,250,.4);color:#c4b5fd;}
+    .sc-mastered{background:rgba(46,204,113,.1);border-color:rgba(46,204,113,.4);color:var(--good);}
+    .diff-legend{font-size:.8rem;color:var(--muted);margin-bottom:14px;display:flex;gap:14px;flex-wrap:wrap;}
+    .diff-legend span{display:flex;align-items:center;gap:5px;}
+    .diff-dot{display:inline-block;width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .diff-1{background:#2ecc71;}.diff-2{background:#f0a500;}.diff-3{background:#ff6b6b;}
+    .qhead{display:flex;gap:10px;justify-content:space-between;align-items:start;flex-wrap:wrap;margin-bottom:14px;}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:#132044;border:1px solid var(--border);color:#d7e2ff;padding:8px 12px;border-radius:999px;font-size:.88rem;}
+    .qnum{color:var(--accent);font-weight:700;}
+    .mode-badge{display:inline-block;font-size:.78rem;padding:3px 10px;border-radius:999px;font-weight:600;vertical-align:middle;}
+    .mb-mc5{background:rgba(122,162,255,.15);color:#9ab8ff;border:1px solid rgba(122,162,255,.3);}
+    .mb-mc3{background:rgba(240,165,0,.12);color:#f0c060;border:1px solid rgba(240,165,0,.3);}
+    .mb-typed{background:rgba(167,139,250,.12);color:#c4b5fd;border:1px solid rgba(167,139,250,.3);}
+    .tiny{font-size:.85rem;color:var(--muted);}
+    .kbd{border:1px solid var(--border);background:#0f1730;padding:2px 7px;border-radius:7px;font-family:ui-monospace,monospace;font-size:.8rem;color:#dce6ff;}
+    .question{font-size:1.08rem;line-height:1.55;white-space:pre-line;margin-bottom:16px;}
+    .choices{display:grid;gap:9px;margin-bottom:14px;}
+    .choice{text-align:left;width:100%;border-radius:16px;padding:13px 16px;background:#152247;border:1px solid var(--border);display:flex;gap:12px;align-items:flex-start;transition:border-color .12s,background .12s;}
+    .choice:not(:disabled):hover{border-color:#4a6aaa;background:#1b2d57;}
+    .choice-letter{min-width:30px;height:30px;display:inline-grid;place-items:center;border-radius:999px;border:1px solid #4864a4;background:#0f1730;font-weight:700;flex-shrink:0;}
+    .choice.correct{border-color:rgba(46,204,113,.7);background:rgba(46,204,113,.12);}
+    .choice.correct .choice-letter{border-color:var(--good);background:rgba(46,204,113,.2);color:var(--good);}
+    .choice.wrong{border-color:rgba(255,107,107,.7);background:rgba(255,107,107,.12);}
+    .choice.wrong .choice-letter{border-color:var(--bad);background:rgba(255,107,107,.2);color:var(--bad);}
+    .typed-area{margin-bottom:14px;}
+    .typed-hint{color:var(--muted);font-size:.93rem;margin:0 0 12px;}
+    .typed-input-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .typed-input{background:#0f1730;border:2px solid var(--border);border-radius:14px;color:var(--text);font:inherit;font-size:1.2rem;font-weight:700;padding:12px 18px;width:80px;text-align:center;text-transform:uppercase;transition:border-color .15s;}
+    .typed-input:focus{outline:none;border-color:var(--accent);}
+    .typed-input.t-correct{border-color:var(--good);background:rgba(46,204,113,.1);}
+    .typed-input.t-wrong{border-color:var(--bad);background:rgba(255,107,107,.1);}
+    .typed-submit{padding:12px 22px;border-radius:14px;background:var(--accent);border:none;color:#0a1020;font-weight:700;font:inherit;cursor:pointer;}
+    .typed-submit:hover{filter:brightness(1.1);}
+    .typed-submit:disabled{opacity:.45;cursor:not-allowed;}
+    .typed-reveal-choices{display:none;margin-top:10px;}
+    .typed-reveal-choices.show{display:block;}
+    .mini-choices{display:grid;gap:7px;margin-top:8px;}
+    .mini-choice{text-align:left;border-radius:12px;padding:9px 14px;background:#0f1730;border:1px solid var(--border);display:flex;gap:10px;align-items:flex-start;font-size:.9rem;}
+    .mini-choice.correct{border-color:rgba(46,204,113,.6);background:rgba(46,204,113,.08);}
+    .mini-choice.wrong-pick{border-color:rgba(255,107,107,.6);background:rgba(255,107,107,.08);}
+    .mini-letter{min-width:26px;height:26px;display:inline-grid;place-items:center;border-radius:999px;border:1px solid #4864a4;background:#0b1020;font-weight:700;flex-shrink:0;font-size:.85rem;}
+    .mini-choice.correct .mini-letter{border-color:var(--good);color:var(--good);}
+    .mini-choice.wrong-pick .mini-letter{border-color:var(--bad);color:var(--bad);}
+    .result{display:none;margin-top:6px;padding:13px 16px;border-radius:16px;border:1px solid var(--border);background:#101938;line-height:1.5;}
+    .result.show{display:block;}
+    .result.good{border-color:rgba(46,204,113,.5);}
+    .result.bad{border-color:rgba(255,107,107,.5);}
+    .explain-panel{display:none;margin-top:12px;border-radius:18px;border:1px solid var(--border);background:#0e1630;overflow:hidden;}
+    .explain-panel.show{display:block;}
+    .explain-header{padding:9px 16px;background:#132044;font-size:.82rem;font-weight:700;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;}
+    .explain-row{display:flex;border-top:1px solid #1e2e52;font-size:.91rem;line-height:1.55;}
+    .explain-letter{min-width:44px;display:flex;align-items:flex-start;justify-content:center;padding:12px 0;font-weight:700;font-size:.93rem;flex-shrink:0;}
+    .explain-row.is-correct .explain-letter{color:var(--good);}
+    .explain-row.is-wrong .explain-letter{color:var(--bad);}
+    .explain-tag{display:inline-block;font-size:.7rem;font-weight:700;text-transform:uppercase;padding:2px 7px;border-radius:6px;margin-right:8px;vertical-align:middle;}
+    .correct-tag{background:rgba(46,204,113,.18);color:var(--good);}
+    .wrong-tag{background:rgba(255,107,107,.18);color:var(--bad);}
+    .explain-body{padding:11px 16px 11px 0;color:#c8d6f5;}
+    .state-toast{display:none;margin-top:10px;padding:9px 14px;border-radius:12px;font-size:.88rem;font-weight:600;text-align:center;}
+    .state-toast.show{display:block;}
+    .st-up{background:rgba(46,204,113,.12);border:1px solid rgba(46,204,113,.4);color:var(--good);}
+    .st-down{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.35);color:#ff9a9a;}
+    .st-master{background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.45);color:#c4b5fd;}
+    .nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-top:16px;}
+    .nav .right{display:flex;gap:10px;flex-wrap:wrap;}
+    .muted{color:var(--muted);}
+    .summary{display:none;margin-top:16px;gap:18px;}
+    .summary.show{display:grid;}
+    .big-score{font-size:clamp(2rem,5vw,3.5rem);font-weight:800;line-height:1;}
+    .summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-top:4px;}
+    .summary-stat{background:#101938;border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;}
+    .summary-stat .num{font-size:1.6rem;font-weight:800;}
+    .summary-stat .lbl{font-size:.78rem;color:var(--muted);margin-top:2px;}
+    .footer{margin-top:16px;color:var(--muted);font-size:.88rem;}
+    @media(max-width:720px){.qhead{flex-direction:column;}.nav{align-items:stretch;}.nav .right,.controls{width:100%;}.nav button,.controls button,.controls select{flex:1;}.typed-input-row{flex-direction:column;align-items:stretch;}.typed-input{width:100%;}}
+  </style>
 </head>
 <body>
-    <h1>Hello World</h1>
+<div class="wrap">
+  <div class="hero">
+    <h1>AP Stats — Adaptive Learn Mode</h1>
+    <div class="sub">48 questions from both review sets. Cards get harder as you improve. Wrong answers return. All cards must be mastered to finish.</div>
+  </div>
+  <div class="panel">
+    <div class="topbar">
+      <div class="stats">
+        <div class="pill" id="masteredPill">Mastered: 0 / 48</div>
+        <div class="pill" id="streakPill" style="display:none">🔥 0</div>
+      </div>
+      <div class="controls">
+        <select id="orderMode"><option value="shuffled">Shuffled</option><option value="original">Original order</option></select>
+        <button id="restartBtn">Restart</button>
+      </div>
+    </div>
+    <div class="mastery-row">
+      <span class="mastery-label">Progress</span>
+      <div class="progress-track"><div class="progress-fill learning-mode" id="progressFill"></div></div>
+      <span class="mastery-count" id="masteredCount">0/48</span>
+    </div>
+    <div class="state-row">
+      <span class="state-chip sc-new" id="cnt-new">● 48 New</span>
+      <span class="state-chip sc-learning" id="cnt-learning" style="display:none">● 0 Learning</span>
+      <span class="state-chip sc-familiar" id="cnt-familiar" style="display:none">● 0 Familiar</span>
+      <span class="state-chip sc-pending" id="cnt-pending" style="display:none">● 0 Type-answer</span>
+      <span class="state-chip sc-mastered" id="cnt-mastered" style="display:none">● 0 Mastered</span>
+    </div>
+    <div class="diff-legend">
+      <span><span class="diff-dot diff-1"></span>Easy</span>
+      <span><span class="diff-dot diff-2"></span>Medium</span>
+      <span><span class="diff-dot diff-3"></span>Hard — needs 2 correct in Familiar stage</span>
+    </div>
+
+    <div id="quizView">
+      <div class="qhead">
+        <div class="badge">
+          <span class="qnum" id="srcLabel">AP Stats</span>
+          <span class="diff-dot" id="diffDot"></span>
+          <span class="mode-badge mb-mc5" id="modeBadge">5-Choice</span>
+        </div>
+        <div class="tiny" id="keyHint">Keys: <span class="kbd">A</span>–<span class="kbd">E</span> &nbsp;|&nbsp; <span class="kbd">Enter</span> next</div>
+      </div>
+      <div class="question" id="questionText"></div>
+      <div class="choices" id="choices"></div>
+      <div class="typed-area" id="typedArea" style="display:none">
+        <p class="typed-hint">No options shown — type the correct letter from memory:</p>
+        <div class="typed-input-row">
+          <input class="typed-input" id="typedInput" maxlength="1" placeholder="?" autocomplete="off" spellcheck="false">
+          <button class="typed-submit" id="typedSubmit">Submit</button>
+        </div>
+        <div class="typed-reveal-choices" id="typedRevealChoices">
+          <div class="tiny" style="margin-bottom:6px;color:var(--muted);">All answer choices:</div>
+          <div class="mini-choices" id="miniChoices"></div>
+        </div>
+      </div>
+      <div class="result" id="resultBox"></div>
+      <div class="state-toast" id="stateToast"></div>
+      <div class="explain-panel" id="explainPanel">
+        <div class="explain-header">Why each answer is right or wrong</div>
+        <div id="explainRows"></div>
+      </div>
+      <div class="nav">
+        <div class="muted" id="statusText">Choose an answer.</div>
+        <div class="right"><button id="nextBtn" disabled>Next →</button></div>
+      </div>
+    </div>
+
+    <div class="summary" id="summaryView">
+      <div class="big-score" style="color:var(--good)">🎉 All Mastered!</div>
+      <div id="summaryMsg"></div>
+      <div class="summary-grid" id="summaryGrid"></div>
+      <div><button id="playAgainBtn">Study again</button></div>
+    </div>
+
+    <div class="footer"><strong>How it works:</strong> Each card passes through <strong>5-choice MC → 3-choice MC → Type Answer</strong>. Hard cards (🔴) need 2 correct answers in the 3-choice stage. Wrong answers return sooner.</div>
+  </div>
+</div>
+<script>
+const Q=[
+{id:"u6-1",src:"AP Stats Unit 6 Review",diff:1,
+q:"USA Today reported that speed skater Bonnie Blair had \u201cwon the USA\u2019s heart,\u201d according to a USA Today/CNN/Gallup poll conducted on the final Thursday of the 1994 Winter Olympics. When asked who was the hero of the Olympics, 65 percent of the respondents chose Blair, who won five gold medals. The poll of 615 adults, done by telephone, had a margin of error of 4 percent. Which statement best describes what is meant by the 4 percent margin of error?",
+ch:{A:"About 4 percent of adults were expected to change their minds between the time of the poll and its publication in USA Today.",B:"About 4 percent of adults did not have telephones.",C:"About 4 percent of the 615 adults polled refused to answer.",D:"Not all of the 615 adults knew anything about the Olympics.",E:"The difference between the sample percentage and the population percentage is likely to be less than 4 percent."},
+ans:"E",
+ex:{A:"Incorrect. Margin of error says nothing about people changing their minds over time. It is purely a measure of statistical precision tied to sampling variability.",B:"Incorrect. Adults without phones create undercoverage bias \u2014 a sampling design problem entirely separate from margin of error.",C:"Incorrect. Refusals cause nonresponse bias, which is a distinct problem from margin of error.",D:"Incorrect. Whether respondents knew about the Olympics is a validity concern, not what margin of error measures.",E:"Correct. Margin of error captures how far the sample statistic (65%) might deviate from the true population value. A 4% MOE means we are confident the true percentage is within 4 percentage points of 65%."}},
+
+{id:"u6-2",src:"AP Stats Unit 6 Review",diff:2,
+q:"An automobile manufacturer claims that the average gas mileage of a new model is 35 miles per gallon (mpg). A consumer group is skeptical of this claim and thinks the manufacturer may be overstating the average gas mileage. If \u03bc represents the true average gas mileage for this new model, which null and alternative hypotheses should the consumer group test?",
+ch:{A:"H\u2080: \u03bc < 35 mpg; H\u2090: \u03bc \u2265 35 mpg",B:"H\u2080: \u03bc \u2264 35 mpg; H\u2090: \u03bc > 35 mpg",C:"H\u2080: \u03bc = 35 mpg; H\u2090: \u03bc > 35 mpg",D:"H\u2080: \u03bc = 35 mpg; H\u2090: \u03bc < 35 mpg",E:"H\u2080: \u03bc = 35 mpg; H\u2090: \u03bc \u2260 35 mpg"},
+ans:"D",
+ex:{A:"Incorrect. H\u2080 must always be a statement of equality (=), never a strict inequality.",B:"Incorrect. H\u2080 must use = rather than \u2264. Using \u2264 is not standard hypothesis testing form.",C:"Incorrect. H\u2090: \u03bc > 35 would test whether the car is actually better than claimed \u2014 the opposite of what the skeptical consumer group suspects.",D:"Correct. H\u2080 states the manufacturer\u2019s claim (\u03bc = 35). The consumer group suspects the mpg is actually lower (overstatement), so H\u2090: \u03bc < 35. This is a left-tailed test.",E:"Incorrect. A two-sided test (\u03bc \u2260 35) is used when there\u2019s no directional suspicion. The consumer group specifically suspects the claim is overstated (too high)."}},
+
+{id:"u6-3",src:"AP Stats Unit 6 Review",diff:3,
+q:"A magazine has 1,620,000 subscribers, of whom 640,000 are women and 980,000 are men. Thirty percent of the women read the advertisements in the magazine and 50 percent of the men read the advertisements. A random sample of 100 subscribers is selected. What is the expected number of subscribers in the sample who read the advertisements?",
+ch:{A:"30",B:"40",C:"42",D:"50",E:"80"},
+ans:"C",
+ex:{A:"Incorrect. 30 = 100 \u00d7 0.30 only applies if all 100 subscribers were women. This ignores the 60.5% of subscribers who are men.",B:"Incorrect. 40 comes from naively averaging 30% and 50% as equal groups. But women are only 640/1620 \u2248 39.5% of subscribers, so men carry more weight.",C:"Correct. P(woman) = 640,000/1,620,000 \u2248 0.3951. P(man) \u2248 0.6049. Expected readers = 100(0.3951)(0.30) + 100(0.6049)(0.50) = 11.85 + 30.25 \u2248 42.",D:"Incorrect. 50 would require approximately half of all subscribers reading ads \u2014 the weighted average is only 42.",E:"Incorrect. 80 would require 80% of all subscribers reading ads, far above either given rate (30% or 50%)."}},
+
+{id:"u6-4",src:"AP Stats Unit 6 Review",diff:1,
+q:"Which of the following is a criterion for choosing a t-test rather than a z-test when making an inference about the mean of a population?",
+ch:{A:"The standard deviation of the population is unknown.",B:"The mean of the population is unknown.",C:"The sample may not have been a simple random sample.",D:"The population is not normally distributed.",E:"The sample size is less than 100."},
+ans:"A",
+ex:{A:"Correct. When the population standard deviation \u03c3 is unknown, we estimate it with the sample s, introducing extra uncertainty. The t-distribution accounts for this added variability; the z-test assumes \u03c3 is known.",B:"Incorrect. The population mean being unknown is the whole point of doing inference \u2014 it applies equally to both z and t tests.",C:"Incorrect. Whether the sample is an SRS is a condition required for both tests, not what distinguishes them.",D:"Incorrect. The t-test is robust to mild non-normality for larger samples. Non-normality alone does not determine which test to use.",E:"Incorrect. There is no hard rule that n < 100 requires a t-test. The deciding factor is whether \u03c3 is known."}},
+
+{id:"u6-5",src:"AP Stats Unit 6 Review",diff:1,
+q:"A researcher designs and executes an experiment to determine whether a certain medication will decrease blood pressure in patients with hypertension. The experiment was well designed with a null hypothesis that blood pressure is unaffected by the medication, and an alternative hypothesis that the medication causes a reduction in blood pressure. The statistical analysis yields a p-value of 0.33. Based on this p-value, which conclusion is most appropriate?",
+ch:{A:"There is insufficient evidence to reject the null hypothesis.",B:"There is sufficient evidence to accept the null hypothesis.",C:"There is insufficient evidence to reach a conclusion about either the null or alternative hypothesis.",D:"There is insufficient evidence to accept the alternative hypothesis.",E:"There is sufficient evidence to reject the alternative hypothesis."},
+ans:"A",
+ex:{A:"Correct. p = 0.33 is far above any standard significance level (\u03b1 = 0.05 or 0.01). We fail to reject H\u2080 \u2014 the data do not provide enough evidence to conclude the medication lowers blood pressure.",B:"Incorrect. We never \u201caccept\u201d H\u2080 in hypothesis testing. Failing to reject it means insufficient evidence against it, not that it\u2019s proven true.",C:"Incorrect. We can reach a clear conclusion: fail to reject H\u2080. A high p-value gives a definite (if undramatic) result.",D:"Incorrect. \u201cAccept the alternative\u201d is not standard statistical language; we either reject or fail to reject H\u2080.",E:"Incorrect. A p-value of 0.33 does not provide grounds to reject anything at standard significance levels."}},
+
+{id:"u6-6",src:"AP Stats Unit 6 Review",diff:2,
+q:"A random sample of 500 likely voters is polled just prior to a city election. Of these voters, 280 say they will vote to re-elect the mayor. Which of the following is a 95% confidence interval for the proportion of votes the mayor will receive in the election?",
+ch:{A:"0.56 \u00b1 1.645\u00b7\u221a(0.56(1\u22120.56)/500)",B:"0.56 \u00b1 1.645\u00b7\u221a(0.56(1\u22120.56))\u00b7\u221a(1/280 + 1/220)",C:"0.56 \u00b1 1.96\u00b7\u221a(0.56(1\u22120.56)/500)",D:"0.56 \u00b1 1.96\u00b7(0.56/\u221a500)",E:"0.56 \u00b1 1.96\u00b7\u221a(0.56(1\u22120.56))\u00b7\u221a(1/280 + 1/220)"},
+ans:"C",
+ex:{A:"Incorrect. 1.645 is the z* critical value for a 90% CI, not 95%.",B:"Incorrect. Uses the wrong z* (1.645 = 90%) and the two-proportion SE formula, which is designed for comparing two independent groups.",C:"Correct. p\u0302 = 280/500 = 0.56; z* = 1.96 for 95%; SE = \u221a(p\u0302(1\u2212p\u0302)/n). This is the correct one-proportion confidence interval.",D:"Incorrect. The SE formula here omits the (1\u2212p\u0302) term, using p\u0302/\u221an instead of the correct \u221a(p\u0302(1\u2212p\u0302)/n).",E:"Incorrect. The z* = 1.96 is correct but uses the two-proportion pooled SE formula, which applies to comparing two groups, not one proportion."}},
+
+{id:"u6-7",src:"AP Stats Unit 6 Review",diff:1,
+q:"In a group of 10 scores, the largest score is increased by 40 points. What will happen to the median?",
+ch:{A:"It will increase by 4 points.",B:"It will increase by 10 points.",C:"It will increase by 40 points.",D:"It will stay the same.",E:"Unable to determine without data values."},
+ans:"D",
+ex:{A:"Incorrect. 40/10 = 4 has no meaningful interpretation here. Adding 40 to the maximum has no effect on the median.",B:"Incorrect. Changing only the largest value cannot move the median regardless of the specific scores.",C:"Incorrect. A change of 40 to the maximum value only affects the median if that value is also the 5th or 6th ordered value.",D:"Correct. With 10 scores, the median is the average of the 5th and 6th values when sorted. Increasing only the 10th (largest) value leaves all middle values unchanged, so the median stays the same.",E:"Incorrect. We can definitively determine the outcome: changing only the maximum never affects the median."}},
+
+{id:"u6-8",src:"AP Stats Unit 6 Review",diff:2,
+q:"Hospital administrators wish to determine the average length of stay for all surgical patients. A statistician determines that for a 95% confidence level estimate of the average length of stay to within \u00b10.50 days, 100 surgical patients' records would have to be examined. How many records should be looked at for a 95% confidence level estimate to within \u00b10.25 days?",
+ch:{A:"25",B:"50",C:"200",D:"400",E:"There is not enough information given to determine the necessary sample size."},
+ans:"D",
+ex:{A:"Incorrect. Decreasing n to 25 makes the MOE larger, not smaller. Fewer records gives less precision.",B:"Incorrect. Halving n increases MOE by \u221a2, not halves it. MOE \u221d 1/\u221an, so you need more, not fewer records.",C:"Incorrect. Doubling n reduces MOE by only a factor of \u221a2 \u2248 1.41, which is insufficient to cut MOE in half.",D:"Correct. MOE \u221d 1/\u221an. To halve the MOE (from 0.50 to 0.25), you must quadruple n: 100 \u00d7 4 = 400.",E:"Incorrect. All necessary information is provided \u2014 the same population, same \u03c3, same confidence level. Only the target MOE changes."}},
+
+{id:"u6-9",src:"AP Stats Unit 6 Review",diff:2,
+q:"In a clinic, 50 patients with sleep disorders are randomly assigned to one of two different groups. Patients in one group are given medication before bedtime. Patients in the other group are given blindfolds and played soft music at bedtime. Each patient is attached to a machine that records breathing patterns. From the patterns, it is possible to determine if the patient is awake or asleep. The data will be used to decide which method is more effective in helping patients with sleep disorders. Which statement is correct in the context of this experiment?",
+ch:{A:"This is a single-blind experiment, because only one group uses blindfolds.",B:"This is a single-blind experiment, because only patients and not doctors use blindfolds.",C:"This is a double-blind experiment, because patients are blindfolded and the doctor does not know which patient receives which treatment.",D:"This experiment cannot be a single-blind experiment, because many patients do not like to be blindfolded.",E:"This experiment cannot be a double-blind experiment, because patients will know which treatment they are receiving, although the examining doctor might not."},
+ans:"E",
+ex:{A:"Incorrect. \u201cSingle-blind\u201d in statistics refers to whether subjects know their treatment assignment \u2014 the physical sleep blindfolds worn during treatment are an entirely different concept.",B:"Incorrect. Same confusion \u2014 physical blindfolds worn to sleep have nothing to do with experimental blinding terminology in research design.",C:"Incorrect. Double-blind requires both subjects AND evaluators to be unaware of treatment assignment. Patients obviously know whether they took a pill or wore a blindfold with music.",D:"Incorrect. Patient comfort preferences about blindfolds are irrelevant to classifying the study\u2019s blinding structure.",E:"Correct. Patients cannot be blinded \u2014 they know which treatment they received. Since at least one party knows their assignment, true double-blinding is impossible. Single-blind may be achievable if the breathing machine evaluator doesn\u2019t know which patient got which treatment."}},
+
+{id:"u6-10",src:"AP Stats Unit 6 Review",diff:1,
+q:"A company wishes to determine the relationship between the number of days spent training employees and their performance on a job aptitude test. Collected data result in a least-squares regression line of \u0177 = 12.1 + 6.2x, where x is the number of training days and \u0177 is the predicted score. Which is the correct interpretation of the slope and y-intercept?",
+ch:{A:"The base score on the test is 12.1 and for every day of training one would expect, on average, an increase of 6.2 on the aptitude test.",B:"The base score on the test is 6.2 and for every day of training one would expect, on average, an increase of 12.1 on the aptitude test.",C:"The mean number of days is 12.1 and for every additional 6.2 days of training one would expect, on average, an increase of 1 unit on the aptitude test.",D:"The mean number of days is 6.2 and for every additional 12.1 days of training one would expect, on average, an increase of 1 unit on the aptitude test.",E:"The mean number of training days is 12.1 and for every day of training one would expect, on average, an increase of 6.2 on the aptitude test."},
+ans:"A",
+ex:{A:"Correct. The y-intercept (12.1) is the predicted score when x = 0 training days (the base score). The slope (6.2) means each additional training day adds 6.2 points to the predicted score on average.",B:"Incorrect. This swaps slope and intercept \u2014 6.2 is the rate of change (slope), not the base score.",C:"Incorrect. 12.1 is the y-intercept (predicted score at zero days), not the mean number of training days.",D:"Incorrect. 6.2 is the slope coefficient (points added per training day), not the mean number of days.",E:"Incorrect. 12.1 is the y-intercept (the predicted score when no training has occurred), not the mean number of training days."}},
+
+{id:"u6-11",src:"AP Stats Unit 6 Review",diff:2,
+q:"Suppose X and Y are independent random variables with E(X) = 780, Var(X) = 75, E(Y) = 430, and Var(Y) = 25. Determine Var(X \u2212 Y).",
+ch:{A:"7.07",B:"10",C:"50",D:"100",E:"Cannot determine"},
+ans:"D",
+ex:{A:"Incorrect. 7.07 \u2248 \u221a50 \u2014 this is the standard deviation if the variance were 50. This confuses variance with standard deviation.",B:"Incorrect. 10 = \u221a100 is the standard deviation of X\u2212Y, not the variance itself.",C:"Incorrect. 50 = 75 \u2212 25 comes from subtracting variances. A common mistake: for independent variables, variances always ADD for both sums and differences.",D:"Correct. Var(X\u2212Y) = Var(X) + Var(Y) = 75 + 25 = 100. The key rule: when variables are independent, variances add regardless of whether the combination is X+Y or X\u2212Y.",E:"Incorrect. Since independence is explicitly stated, the variance addition rule applies directly."}},
+
+{id:"u6-12",src:"AP Stats Unit 6 Review",diff:3,
+q:"A soft drink dispenser can be adjusted to deliver any fixed number of ounces on average. If the machine is operating with a standard deviation of 0.3 ounce, what should the mean setting be so that a 12-ounce cup will overflow less than 1% of the time? Assume a normal distribution for ounces delivered.",
+ch:{A:"11.23 ounces",B:"11.30 ounces",C:"11.70 ounces",D:"12.70 ounces",E:"12.77 ounces"},
+ans:"B",
+ex:{A:"Incorrect. This uses the wrong z-value or an arithmetic error in the reverse normal calculation.",B:"Correct. We need P(X > 12) < 0.01, so 12 oz must be at the 99th percentile. The z-score for the 99th percentile is 2.326. Solving: \u03bc = 12 \u2212 2.326(0.3) = 12 \u2212 0.698 \u2248 11.30 oz.",C:"Incorrect. Uses z \u2248 1.0 (the 84th percentile) \u2014 the cup would overflow far more than 1% of the time.",D:"Incorrect. A mean of 12.70 > 12 means the cup overflows more than 50% of the time \u2014 completely opposite of the goal.",E:"Incorrect. Any mean set above 12 oz causes overflow more than half the time by definition."}},
+
+{id:"u6-13",src:"AP Stats Unit 6 Review",diff:1,
+q:"Suppose the correlation between two variables is r = 0.19. What is the new correlation if 0.23 is added to all values of the x-variable, every value of the y-variable is doubled, and the two variables are interchanged?",
+ch:{A:"\u22120.84",B:"\u22120.42",C:"\u22120.19",D:"0.19",E:"\u22120.84"},
+ans:"D",
+ex:{A:"Incorrect. Negative correlation arises only from multiplying a variable by a negative number. None of these three operations involve multiplication by a negative.",B:"Incorrect. None of these linear transformations change the magnitude or sign of r in any way.",C:"Incorrect. The sign of r is not flipped by adding a constant, multiplying by a positive, or swapping x and y.",D:"Correct. Correlation r is invariant under all three operations: (1) adding any constant to x; (2) multiplying y by any positive constant; (3) swapping x and y. Therefore r remains 0.19.",E:"Incorrect. Same error as A \u2014 none of these operations produce a negative correlation."}},
+
+{id:"u6-14",src:"AP Stats Unit 6 Review",diff:2,
+q:"Sherry conducts an experiment, collects data, and computes a z-test statistic from the data. She uses a two-sided test and finds that the test statistic is statistically significant. What would Sherry have concluded if she had conducted a one-sided test?",
+ch:{A:"It would be significant since the p-value for a one-sided test is half the p-value for a two-sided test.",B:"It would be significant since the p-value for a one-sided test is twice the p-value for a two-sided test.",C:"It would not be significant since the p-value for a one-sided test is half the p-value for a two-sided test.",D:"It is impossible to tell since the p-value for a one-sided test is twice the p-value for a two-sided test. We do not know the p-value or the significance level.",E:"It is impossible to tell since we do not know on which side the test is conducted."},
+ans:"A",
+ex:{A:"Correct. For a z-test, the one-sided p-value (in the direction the data point) is exactly half the two-sided p-value. Since the two-sided result was already significant, the even smaller one-sided p-value is also significant.",B:"Incorrect. The one-sided p-value is HALF of the two-sided p-value \u2014 not twice. You look at one tail instead of both.",C:"Incorrect. Half the p-value means it\u2019s smaller, making it MORE significant, not less.",D:"Incorrect. The relationship is mathematically defined: p-value(one-sided) = p-value(two-sided)/2. No extra information is needed.",E:"Incorrect. We know the data were significant in some direction. The one-sided test in that direction will always be significant when the two-sided test is."}},
+
+{id:"u6-15",src:"AP Stats Unit 6 Review",diff:3,
+q:"A cookbook has recipes for 10 chicken dinners, 10 beef dinners, and 15 vegetarian dinners. Pat plans dinner by picking a recipe at random from the book. Every one of the 35 meals has an equal chance of being selected each time Pat plans a dinner. What is the probability that Pat prepares exactly 3 vegetarian dinners over 7 consecutive days?",
+ch:{A:"3/7",B:"(15/35)^3",C:"(15/35)^3(20/35)^4",D:"3(15/35)(20/35)",E:"(7 choose 3)(15/35)^3(20/35)^4"},
+ans:"E",
+ex:{A:"Incorrect. 3/7 is just the proportion of vegetarian days \u2014 it completely ignores probability theory and the number of possible arrangements.",B:"Incorrect. This gives the probability that the first 3 days are vegetarian, ignoring the other 4 days entirely.",C:"Incorrect. Correctly accounts for both vegetarian and non-vegetarian day probabilities but omits the C(7,3) = 35 factor that counts all orderings.",D:"Incorrect. This expression does not correspond to any correct probability formula for this binomial scenario.",E:"Correct. Binomial: n = 7, k = 3, p = 15/35. C(7,3) = 35 counts all orderings of 3 vegetarian days in 7; (15/35)\u00b3 is the probability of 3 vegetarian picks; (20/35)\u2074 is the probability of 4 non-vegetarian picks."}},
+
+{id:"u6-16",src:"AP Stats Unit 6 Review",diff:3,
+q:"A researcher is trying to find a 90% confidence interval for the proportion of human pregnancies that run longer than 270 days. The researcher wants a margin of error no larger than 0.02. Of the following sample sizes, which is the smallest that will accomplish this goal?",
+ch:{A:"2,402",B:"1,692",C:"1,028",D:"625",E:"133"},
+ans:"B",
+ex:{A:"Incorrect. 2,402 is the required sample size for a 95% CI (z* = 1.96) with ME = 0.02, not a 90% CI.",B:"Correct. For 90% CI, z* = 1.645. Using the conservative p = 0.5: n = (z*/ME)\u00b2 \u00d7 0.25 = (1.645/0.02)\u00b2 \u00d7 0.25 = 6765.06 \u00d7 0.25 = 1691.3. Round up to 1,692.",C:"Incorrect. 1,028 is too small; it would produce a margin of error exceeding 0.02.",D:"Incorrect. 625 gives a margin of error much larger than 0.02 at 90% confidence.",E:"Incorrect. Far too small; would produce a margin of error many times larger than 0.02."}},
+
+{id:"u6-17",src:"AP Stats Unit 6 Review",diff:2,
+q:"Chelsea designs an experiment to measure the difference in subjects' pulse rates while listening to two recordings of the same piece of music, one with a strong drum track and one with the drum track removed. She works with 50 subjects, measuring each subject's pulse rates in response to each recording. The order in which each subject listens to the two tracks is randomized, and a period of time is allowed between trials. Which would be the most appropriate statistical test in this situation?",
+ch:{A:"Matched pairs t-test",B:"One-sample proportion z-test",C:"Chi-square test for homogeneity of proportions",D:"One-sample t-test",E:"Two-sample t-test"},
+ans:"A",
+ex:{A:"Correct. The same 50 subjects are measured under both conditions. Computing each person\u2019s difference and running a matched pairs t-test controls for individual baseline pulse rate variation.",B:"Incorrect. Pulse rate is a quantitative measurement, not a proportion. No successes/failures to count here.",C:"Incorrect. Chi-square tests apply to categorical data. Pulse rate is continuous and quantitative.",D:"Incorrect. A one-sample t-test compares one group\u2019s mean to a hypothesized value, not paired measurements under two conditions.",E:"Incorrect. Two-sample t-test assumes two independent groups. The same subjects provide both measurements, making the data dependent (paired)."}},
+
+{id:"u6-18",src:"AP Stats Unit 6 Review",diff:1,
+q:"A large-sample 99% confidence interval for the proportion of American adults that believe climate change is a serious problem is (0.61, 0.69). What is the sample proportion from which this interval was constructed?",
+ch:{A:"0.04",B:"0.08",C:"0.65",D:"0.66",E:"It could be any number between 0.61 and 0.69"},
+ans:"C",
+ex:{A:"Incorrect. 0.04 is the margin of error = (0.69 \u2212 0.61)/2 = 0.04, not the sample proportion.",B:"Incorrect. 0.08 = 0.69 \u2212 0.61 is the total width of the CI, not the center.",C:"Correct. The sample proportion is always the midpoint of the confidence interval: p\u0302 = (0.61 + 0.69)/2 = 0.65.",D:"Incorrect. The midpoint is (0.61 + 0.69)/2 = 1.30/2 = 0.65, not 0.66.",E:"Incorrect. The sample proportion is uniquely determined \u2014 it is exactly the center of the interval, not any value within it."}},
+
+{id:"u6-19",src:"AP Stats Unit 6 Review",diff:2,
+q:"For the nine planets in the solar system, a list is made of the length of a year Y (measured in Earth years) and the mean orbital radius R (measured in millions of km). A regression analysis yields \u0177 = \u221213 + 0.0408R, r\u00b2 = 0.98, and a residual plot. Which statement is the most accurate about the regression results?",
+ch:{A:"The value of r\u00b2 shows there is a strong linear relationship between length of year and mean orbital radius.",B:"The residual plot shows there is a strong linear relationship between length of year and mean orbital radius.",C:"The slope of the regression line shows there is a negative association between length of year and mean orbital radius.",D:"The regression line underpredicts the length of a year for a planet with mean orbital radius 100 million km.",E:"The regression line makes a very accurate prediction for the length of a year for a planet with mean orbital radius 100 million km."},
+ans:"D",
+ex:{A:"Incorrect. r\u00b2 = 0.98 seems high, but a curved (nonrandom) residual plot reveals the relationship is nonlinear. High r\u00b2 alone can be misleading when the wrong model form is used.",B:"Incorrect. A curved residual plot is evidence AGAINST linearity \u2014 systematic patterns in residuals signal the linear model is inadequate.",C:"Incorrect. The slope 0.0408 is positive: as orbital radius increases, year length increases.",D:"Correct. The curved residual plot shows the linear model systematically underpredicts at certain radii. At 100 million km, the true nonlinear relationship produces a longer year than the linear model predicts.",E:"Incorrect. The curved residual plot reveals poor predictions at many orbital radii, including around 100 million km."}},
+
+{id:"u6-20",src:"AP Stats Unit 6 Review",diff:2,
+q:"An executive at an advertising firm must decide whether to continue with the current ad campaign for a product or move on to a new campaign. The firm tested the two campaigns with focus groups, using a null hypothesis that there is no difference in the campaigns, and an alternative hypothesis that the new campaign is superior at motivating consumers to shop at the store. Which best describes the consequences of a Type II error?",
+ch:{A:"The firm will continue with the old campaign even though the new campaign is better.",B:"The firm will switch to the new campaign even though the old campaign is better.",C:"The firm will continue with the old campaign even though there is no difference in the two campaigns.",D:"The firm will switch to the new campaign even though there is no difference in the two campaigns.",E:"The firm will switch to the new campaign even though the evidence is inconclusive."},
+ans:"A",
+ex:{A:"Correct. Type II error = failing to reject a false H\u2080. The new campaign is actually better (H\u2080 is false), but the test fails to detect this. The firm keeps the old campaign, missing out on the better one.",B:"Incorrect. Switching when the old campaign is actually better = rejecting a true H\u2080 = Type I error.",C:"Incorrect. If there\u2019s truly no difference and we keep the old campaign, that\u2019s the correct decision \u2014 not an error.",D:"Incorrect. Switching when there\u2019s actually no difference = rejecting a true H\u2080 = Type I error.",E:"Incorrect. This doesn\u2019t correspond to the formal definition of either error type."}},
+
+{id:"u6-21",src:"AP Stats Unit 6 Review",diff:3,
+q:"Six capsules of drug A took an average of 75 seconds with a standard deviation of 1.4 seconds to dissolve, while the average time for six capsules of drug B was 71 seconds with a standard deviation of 1.7 seconds. Establish a 99% confidence interval estimate for the difference in dissolving time between the two brands, assuming normal distributions.",
+ch:{A:"4 \u00b1 1.55",B:"4 \u00b1 2.48",C:"4 \u00b1 2.56",D:"4 \u00b1 2.85",E:"4 \u00b1 3.10"},
+ans:"D",
+ex:{A:"Incorrect. The margin of error is too small \u2014 uses a critical value appropriate for a lower confidence level.",B:"Incorrect. Corresponds to a lower confidence level or incorrect degrees of freedom calculation.",C:"Incorrect. Close but uses slightly different t* or rounding in the SE.",D:"Correct. Point estimate = 75 \u2212 71 = 4. SE = \u221a(1.4\u00b2/6 + 1.7\u00b2/6) = \u221a(0.3267 + 0.4817) \u2248 0.899. With df \u2248 9\u201310, t* \u2248 3.169 for 99%. MOE = 3.169 \u00d7 0.899 \u2248 2.85.",E:"Incorrect. Slightly too large; possibly uses more conservative df = 5 instead of the Welch approximation."}},
+
+{id:"u6-22",src:"AP Stats Unit 6 Review",diff:2,
+q:"A manufacturer of ready-bake cake mixes is interested in designing an experiment to test the effects of four different temperature levels, two different types of pans (glass vs. tin), and three different types of ovens (gas, electric, and microwave) on the texture of its cakes. Which best describes the experiment that would be conducted?",
+ch:{A:"A completely randomized design with 9 treatment groups",B:"A completely randomized design with 24 treatment groups",C:"A randomized blocked design, blocked on temperature, with 6 treatment groups",D:"A randomized blocked design, blocked on type of pan, with 12 treatment groups",E:"A randomized blocked design, blocked on oven, with 8 treatment groups"},
+ans:"B",
+ex:{A:"Incorrect. 9 = 3 \u00d7 3 only accounts for two of the three factors being studied.",B:"Correct. All three factors are being investigated together in a factorial design: 4 temperatures \u00d7 2 pan types \u00d7 3 oven types = 24 treatment combinations. This is a completely randomized factorial design.",C:"Incorrect. Blocking on temperature would treat it as a nuisance variable to be controlled, but temperature is one of the factors being studied.",D:"Incorrect. Blocking on pan type treats it as a nuisance variable, reducing the design to studying only two factors.",E:"Incorrect. Blocking on oven type treats it as a nuisance variable, ignoring its status as a factor of interest."}},
+
+{id:"u6-23",src:"AP Stats Unit 6 Review",diff:2,
+q:"Seamus is deciding whether to use a 95% confidence interval or a 99% confidence interval for the population mean when analyzing a large sample he has randomly collected from a population. Which statement about the intervals is true?",
+ch:{A:"The margin of error for the 95% confidence interval is 5% of the sample mean.",B:"The margin of error for the 99% confidence interval is 2.576.",C:"If the sample size is at least 1,000, the margin of error for the 99% confidence interval will be much larger than the margin of error for the 95% confidence interval.",D:"The 99% confidence interval will be wider than the 95% confidence interval regardless of the size of Seamus\u2019s sample.",E:"The width of the 99% confidence interval will be smaller than the margin of error for the 95% confidence interval."},
+ans:"D",
+ex:{A:"Incorrect. MOE is not a percentage of the sample mean. It equals z* \u00d7 SE, which depends on population variability and n.",B:"Incorrect. 2.576 is the z* critical value for 99% \u2014 not the MOE. The actual MOE = 2.576 \u00d7 \u03c3/\u221an.",C:"Incorrect. The 99% CI is always wider, but a large n makes both intervals narrow. The 99% remains wider, just both are narrower \u2014 not much larger in absolute terms.",D:"Correct. A higher confidence level always requires a wider interval, regardless of sample size. z* = 2.576 (99%) > z* = 1.96 (95%) for any given dataset.",E:"Incorrect. The 99% CI is wider, so its MOE is larger than the 95% MOE \u2014 the opposite of this claim."}},
+
+{id:"u6-24",src:"AP Stats Unit 6 Review",diff:2,
+q:"The boxplots below summarize data sets I and II. Which of the following statements is a correct conclusion that can be drawn from these boxplots?",
+ch:{A:"The 40th percentile of data set II is smaller than the 60th percentile of data set I.",B:"Data set I has a smaller interquartile range.",C:"About 25% of the values in data set I are between 65 and 84.",D:"Data set I contains more data points.",E:"Data set II has a larger range."},
+ans:"A",
+ex:{A:"Correct. The 40th percentile of any distribution lies below its median (50th percentile). Based on the boxplots, the upper portions of data set I\u2019s distribution extend above data set II\u2019s median, supporting this conclusion.",B:"Incorrect. Based on the boxplots, data set I does not have the smaller IQR (box width).",C:"Incorrect. The specific interval 65\u201384 containing exactly 25% requires seeing the actual boxplot values not described in the text.",D:"Incorrect. Boxplots display only the five-number summary \u2014 they communicate nothing about how many data points are in a dataset.",E:"Incorrect. Data set II does not have the larger range based on typical versions of this problem."}},
+
+{id:"u6-25",src:"AP Stats Unit 6 Review",diff:1,
+q:"Which of the following statements is true regarding a one-sample t-interval?",
+ch:{A:"It is used to estimate the population standard deviation.",B:"It is used to compare the means of two independent samples.",C:"It requires the population distribution to be normally distributed.",D:"It is used to estimate the population mean when the population standard deviation is unknown.",E:"It is used to estimate the population proportion."},
+ans:"D",
+ex:{A:"Incorrect. CIs for the population standard deviation use the chi-square distribution, not the t-distribution.",B:"Incorrect. Comparing two independent means requires a two-sample t-interval.",C:"Incorrect. For large n, the CLT ensures the sampling distribution of x\u0305 is approximately normal even without a normal population. Strict normality is only critical for very small samples.",D:"Correct. The one-sample t-interval estimates the population mean \u03bc using x\u0305 \u00b1 t*(s/\u221an), specifically because the population SD \u03c3 is unknown.",E:"Incorrect. Estimating a proportion requires a z-interval: p\u0302 \u00b1 z*\u221a(p\u0302(1\u2212p\u0302)/n)."}},
+
+{id:"u6-26",src:"AP Stats Unit 6 Review",diff:3,
+q:"The number of accidents per day at a large factory is noted for each of 64 days with x\u0305 = 3.58 and s = 1.52. With what degree of confidence can we assert that the mean number of accidents per day at the factory is between 3.20 and 3.96?",
+ch:{A:"48%",B:"63%",C:"90%",D:"95%",E:"99%"},
+ans:"D",
+ex:{A:"Incorrect. z = 2.0 corresponds to much higher than 48% confidence.",B:"Incorrect. z \u2248 0.93 gives roughly 63% confidence. Our calculated z-value is 2.0.",C:"Incorrect. z = 1.645 gives 90% confidence. Our z-value is 2.0, which is higher.",D:"Correct. SE = s/\u221an = 1.52/\u221a64 = 0.19. Half-width = (3.96 \u2212 3.58)/2 = 0.19. z = 0.19/0.19 = 2.0. P(\u22122 < Z < 2) \u2248 95.44% \u2248 95%.",E:"Incorrect. z = 2.576 gives 99% confidence. Our z-value is only 2.0."}},
+
+{id:"u6-27",src:"AP Stats Unit 6 Review",diff:2,
+q:"To test which of two fuel additives results in better gas mileage, the average miles per gallon is noted when 40 cars are run for 1 week using the first additive, and then the average miles per gallon is calculated for the same 40 cars when they are run for another week. What is the conclusion at a 10% significance level if a two-sample hypothesis test with p-value 0.25 is used?",
+ch:{A:"The observed difference in miles per gallon is significant.",B:"The observed difference in miles per gallon is not significant.",C:"A conclusion is not possible without knowing the mean miles per gallon obtained using each additive.",D:"A conclusion is not possible without knowing both the mean and the standard deviation resulting from the use of each additive.",E:"A two-sample hypothesis test should not be used in this example."},
+ans:"E",
+ex:{A:"Incorrect. p = 0.25 > 0.10 is not significant, but the bigger issue is the test itself is wrong.",B:"Incorrect. While p = 0.25 is not significant, the primary problem is using an inappropriate test design.",C:"Incorrect. The fundamental flaw is the choice of test, not missing summary statistics.",D:"Incorrect. The real issue is that the test assumes independence when the data are paired.",E:"Correct. The SAME 40 cars were tested with both additives \u2014 this is a matched pairs (dependent) design. A two-sample t-test assumes two independent groups. A matched pairs t-test is the appropriate procedure here."}},
+
+{id:"u6-28",src:"AP Stats Unit 6 Review",diff:1,
+q:"Which of the following can be used to show a cause-and-effect relationship between two variables?",
+ch:{A:"A census",B:"A controlled experiment",C:"An observational study",D:"A sample survey",E:"A cross-sectional survey"},
+ans:"B",
+ex:{A:"Incorrect. A census measures every individual but doesn\u2019t manipulate any variable, so causation cannot be established.",B:"Correct. Only a controlled experiment \u2014 with random assignment to treatments and control of confounding variables \u2014 can establish a cause-and-effect relationship.",C:"Incorrect. Observational studies reveal associations but confounding variables prevent causal conclusions.",D:"Incorrect. Sample surveys describe population characteristics but don\u2019t manipulate any variable.",E:"Incorrect. Cross-sectional surveys capture a snapshot in time and cannot isolate causal mechanisms."}},
+
+{id:"u6-29",src:"AP Stats Unit 6 Review",diff:3,
+q:"A recent study of health service costs for coronary angioplasty versus coronary artery bypass surgery at a London hospital showed an average cost of \u00a36176 with a standard deviation of \u00a3329 for 231 angioplasties and an average cost of \u00a38164 with a standard deviation of \u00a3264 for 221 bypass surgeries. Is this sufficient evidence to say that the average cost of angioplasty is less than the average cost of bypass surgery?",
+ch:{A:"P < .001, so this is very strong evidence that angioplasty costs less.",B:"P is between .001 and .01, so this is strong evidence that angioplasty costs less.",C:"P is between .01 and .05, so this is moderate evidence that angioplasty costs less.",D:"P is between .05 and .10, so there is some evidence that angioplasty costs less.",E:"P > .10, so there is little evidence that angioplasty costs less."},
+ans:"A",
+ex:{A:"Correct. z = (6176 \u2212 8164)/\u221a(329\u00b2/231 + 264\u00b2/221) \u2248 \u22121988/28 \u2248 \u221271. This enormous test statistic yields a p-value astronomically below 0.001.",B:"Incorrect. The p-value is far below 0.001 given this near-impossible z-score.",C:"Incorrect. With n > 200 for each group and a \u00a32,000 cost difference relative to SDs under \u00a3330, the evidence is overwhelming.",D:"Incorrect. Essentially opposite of the truth.",E:"Incorrect. This is about as strong as statistical evidence gets."}},
+
+{id:"u6-30",src:"AP Stats Unit 6 Review",diff:3,
+q:"The number of adults living in homes on a randomly selected city block is described by the following probability distribution: x = 1, 2, 3, 4 with probabilities 0.25, 0.50, 0.15, 0.10. What is the standard deviation of the probability distribution?",
+ch:{A:"0.50",B:"0.62",C:"0.79",D:"0.89",E:"2.10"},
+ans:"D",
+ex:{A:"Incorrect. 0.50 does not result from correctly applying the variance formula to this distribution.",B:"Incorrect. Arithmetic error likely in computing E(X\u00b2) or the variance.",C:"Incorrect. 0.79 is the VARIANCE \u2014 you still need to take the square root to get the standard deviation.",D:"Correct. E(X) = 1(.25)+2(.50)+3(.15)+4(.10) = 0.25+1.00+0.45+0.40 = 2.10. E(X\u00b2) = 1(.25)+4(.50)+9(.15)+16(.10) = 0.25+2.00+1.35+1.60 = 5.20. Var = 5.20 \u2212 2.10\u00b2 = 0.79. SD = \u221a0.79 \u2248 0.89.",E:"Incorrect. 2.10 is the mean E(X), not the standard deviation."}},
+
+{id:"u6-31",src:"AP Stats Unit 6 Review",diff:2,
+q:"Which of the following statements are true?\nI. Random sampling is a good way to reduce response bias.\nII. To guard against bias from undercoverage, use a convenience sample.\nIII. Increasing the sample size tends to reduce survey bias.\nIV. To guard against nonresponse bias, use a mail-in survey.",
+ch:{A:"I only",B:"II only",C:"III only",D:"IV only",E:"None of the above"},
+ans:"E",
+ex:{A:"Incorrect. I is false. Random sampling reduces variability and undercoverage, but not response bias. People can still give inaccurate answers regardless of how they were selected.",B:"Incorrect. II is false. Convenience samples make undercoverage worse by systematically excluding hard-to-reach groups.",C:"Incorrect. III is false. Larger samples reduce variability (margin of error), not bias. A large biased sample is still biased \u2014 bias and variability are completely different concepts.",D:"Incorrect. IV is false. Mail-in surveys typically have extremely low response rates, which increases nonresponse bias.",E:"Correct. All four statements are false. This is a classic question testing the critical distinction between bias and variability in sampling."}},
+
+{id:"u6-32",src:"AP Stats Unit 6 Review",diff:2,
+q:"A random sample of 150 workers at a local factory found that 72% of them had volunteered time at a local charity in the past year. Determine the standard error of the sample proportion.",
+ch:{A:"0.001",B:"0.016",C:"0.037",D:"0.057",E:"0.069"},
+ans:"C",
+ex:{A:"Incorrect. 0.001 \u2248 SE\u00b2 (the variance of p\u0302), not the standard error itself.",B:"Incorrect. Results from an incorrect formula or a different n value.",C:"Correct. SE = \u221a(p\u0302(1\u2212p\u0302)/n) = \u221a(0.72 \u00d7 0.28 / 150) = \u221a(0.2016/150) = \u221a0.001344 \u2248 0.0367.",D:"Incorrect. Results from omitting the (1\u2212p\u0302) term in the formula.",E:"Incorrect. Too large; corresponds to a different p\u0302 or sample size."}},
+
+{id:"u6-33",src:"AP Stats Unit 6 Review",diff:3,
+q:"Nine subjects, 87 to 96 years old, were given 8 weeks of progressive resistance weight training. Strength before and after training for each individual was measured as maximum weight lifted by left knee extension. Find a 95% confidence interval estimate for the strength gain.",
+ch:{A:"11.61 \u00b1 3.03",B:"11.61 \u00b1 3.69",C:"11.61 \u00b1 3.76",D:"19.11 \u00b1 1.25",E:"19.11 \u00b1 3.69"},
+ans:"C",
+ex:{A:"Incorrect. Slightly too small a margin \u2014 likely uses t* = 2.262 (df = 9) instead of the correct value.",B:"Incorrect. Uses t* = 2.262 with slight arithmetic error in the standard error.",C:"Correct. n = 9 paired differences, df = n \u2212 1 = 8, t* = 2.306 for a 95% CI. Mean gain = 11.61. The correct interval is 11.61 \u00b1 3.76.",D:"Incorrect. 19.11 is the wrong mean gain \u2014 the actual mean difference in strength is 11.61, not 19.11.",E:"Incorrect. Uses the wrong mean value (19.11 instead of 11.61)."}},
+
+{id:"u6-34",src:"AP Stats Unit 6 Review",diff:1,
+q:"The Department of Health for a Midwestern state conducted an observational study in which users of public restrooms at several sites throughout the state were discreetly observed. Of the 634 females observed, 476 washed their hands. Of the 561 males observed, 326 washed their hands. What significance test should be used to determine whether these data provide sufficient evidence to reject the hypothesis that the proportion of females in this state who wash their hands when using a public restroom is the same as the proportion of males in this state who wash their hands when using a public restroom?",
+ch:{A:"One-proportion z-test",B:"Two-proportion z-test",C:"One-sample z-test for a mean",D:"One-sample t-test for a mean",E:"Two-sample t-test for means"},
+ans:"B",
+ex:{A:"Incorrect. A one-proportion z-test compares a single sample proportion to a fixed hypothesized value. Here we have two separate groups to compare.",B:"Correct. We are comparing two independent proportions (female hand-washers vs male hand-washers). The two-proportion z-test is the correct procedure.",C:"Incorrect. This tests a population mean against a hypothesized value \u2014 unrelated to comparing two proportions.",D:"Incorrect. Tests a mean using the t-distribution; not appropriate for categorical outcomes like washed/didn\u2019t wash.",E:"Incorrect. Two-sample t-test compares two means. The outcome here is categorical (washed/didn\u2019t wash), so proportions, not means, are analyzed."}},
+
+{id:"u6-35",src:"AP Stats Unit 6 Review",diff:2,
+q:"When a virus is placed on a tobacco leaf, small lesions appear on the leaf. To compare the mean number of lesions produced by two different strains of virus, one strain is applied to half of each of 8 tobacco leaves, and the other strain is applied to the other half of each leaf. The strain that goes on the right half of the leaf is decided by a coin flip. What is the number of degrees of freedom associated with the appropriate t-test for testing whether there is a difference between the mean number of lesions per leaf produced by the two strains?",
+ch:{A:"7",B:"8",C:"11",D:"14",E:"16"},
+ans:"A",
+ex:{A:"Correct. Both strains are applied to the same leaf \u2014 this is a matched pairs design. We compute one difference per leaf. n = 8 pairs, so df = n \u2212 1 = 7.",B:"Incorrect. 8 is the number of leaves (sample size), not the degrees of freedom. df = n \u2212 1 = 7.",C:"Incorrect. 11 might come from Welch\u2019s df formula for independent two-sample t-tests \u2014 wrong for paired data.",D:"Incorrect. 14 = 2(8) \u2212 2 is the degrees of freedom for an independent two-sample t-test.",E:"Incorrect. 16 = 2(8) doesn\u2019t correspond to any standard degrees of freedom formula here."}},
+
+{id:"u6-36",src:"AP Stats Unit 6 Review",diff:3,
+q:"In a carnival game, a person can win a prize by guessing which one of 5 identical boxes contains the prize. After each guess, regardless of whether the prize was won, a new prize is randomly placed in one of the 5 boxes. If a person makes 4 guesses, what is the probability that the person wins a prize exactly 2 times?",
+ch:{A:"2!/5!",B:"(0.2)^2 / (0.8)^2",C:"2(0.2)(0.8)",D:"(0.2)^2(0.8)^2",E:"(4 choose 2)(0.2)^2(0.8)^2"},
+ans:"E",
+ex:{A:"Incorrect. 2!/5! is a permutation ratio with no applicable meaning for this probability problem.",B:"Incorrect. Dividing probabilities like this has no probabilistic interpretation for this context.",C:"Incorrect. Resembles a partial binomial expression for n = 2, not n = 4, and is missing the binomial coefficient.",D:"Incorrect. Gives the probability of one specific ordering (win-win-lose-lose) but ignores C(4,2) = 6 other orderings of exactly 2 wins in 4 trials.",E:"Correct. Binomial distribution: n = 4, k = 2, p = 1/5 = 0.2. C(4,2) = 6 counts all orderings; (0.2)\u00b2 is the probability of exactly 2 wins; (0.8)\u00b2 is the probability of exactly 2 losses."}},
+
+{id:"u6-37",src:"AP Stats Unit 6 Review",diff:2,
+q:"A survey conducted by a national news network asked a random sample of U.S. adults whether they get most of their information about current events from newspapers, television, the internet, or some other source. The results are reported by age group. How would you calculate the probability that a person gets their information from the internet given that they are over the age of 55?",
+ch:{A:"5/65",B:"5/103",C:"5/295",D:"65/295",E:"103/295"},
+ans:"B",
+ex:{A:"Incorrect. 65 is not the total number of people over 55 \u2014 this uses the wrong denominator.",B:"Correct. Conditional probability: P(internet | over 55) = (people over 55 who use internet) / (total over 55) = 5/103. We restrict the sample space to the over-55 group.",C:"Incorrect. 5/295 is the unconditional (marginal) probability of using the internet \u2014 not conditional on being over 55.",D:"Incorrect. 65/295 gives the proportion of some other category, not the conditional probability asked for.",E:"Incorrect. 103/295 = P(over 55) is the probability of being in the over-55 group \u2014 that\u2019s the condition itself, not the conditional probability."}},
+
+{id:"u6-38",src:"AP Stats Unit 6 Review",diff:2,
+q:"A researcher selects a random sample of size n from a population and uses the collected data to compute a 95% confidence interval for the mean of the population. If the same data were used to compute a second confidence interval, which of the following would produce a confidence interval with a larger margin of error?",
+ch:{A:"Increasing the confidence level",B:"Decreasing the confidence level",C:"Increasing the sample size",D:"Computing the interval n times so that approximately 5% of these intervals will be larger",E:"None of the above can guarantee a larger margin of error"},
+ans:"A",
+ex:{A:"Correct. MOE = z* \u00d7 (s/\u221an). Increasing the confidence level (e.g., from 95% to 99%) increases z* (from 1.96 to 2.576), which directly increases MOE with the same data.",B:"Incorrect. Decreasing the confidence level reduces z*, making the MOE smaller, not larger.",C:"Incorrect. The problem specifies the same data, so n is fixed. You cannot change the sample size after the fact.",D:"Incorrect. Repeating the identical calculation with the same data yields the same interval every time.",E:"Incorrect. Option A definitively guarantees a larger MOE by increasing the z* critical value."}},
+
+{id:"u7-1",src:"Inference for Quantitative Data: Means",diff:2,
+q:"A researcher wants to test a hypothesis that a population mean is greater than 50. He gathers a sample of 35 measurements and finds the sample mean was 54.5 and the standard deviation was 10.2. What is the value of the test statistic for a one-sample t test for a population mean?",
+ch:{A:"\u22120.44",B:"0.44",C:"\u22122.61",D:"2.61",E:"None of the above"},
+ans:"D",
+ex:{A:"Incorrect. A negative t-statistic means the sample mean is below the null value. Since 54.5 > 50, t must be positive.",B:"Incorrect. 0.44 = (54.5 \u2212 50)/10.2 \u2014 this forgets to divide by \u221a35, omitting the standard error denominator.",C:"Incorrect. The sign is wrong. Since 54.5 > 50, the numerator is positive, giving a positive t.",D:"Correct. t = (x\u0305 \u2212 \u03bc\u2080)/(s/\u221an) = (54.5 \u2212 50)/(10.2/\u221a35) = 4.5/1.724 \u2248 2.61.",E:"Incorrect. The calculation does yield exactly 2.61, which is listed as choice D."}},
+
+{id:"u7-2",src:"Inference for Quantitative Data: Means",diff:2,
+q:"A nutrition researcher is hoping to evaluate the claimed sugar content on a new McDonald\u2019s sandwich. McDonald\u2019s claims that the sandwich has 20g of sugar and a sample of 5 sandwiches shows sugar contents of 15, 22, 18, 17, and 23. What assumption(s) do we have to make in order to carry out a legitimate statistical test of the claim?\nI. The 5 sandwiches are from an approximately normally distributed population.\nII. The 5 sandwiches can be viewed as coming from a simple random sample.\nIII. The standard deviation of the population of all McDonald sandwich sugar content is known.",
+ch:{A:"I only",B:"II only",C:"III only",D:"I and II",E:"I, II, and III"},
+ans:"D",
+ex:{A:"Incorrect. Normality is necessary with n = 5 since the CLT doesn\u2019t apply, but it\u2019s not sufficient by itself \u2014 we also need the sample to be random.",B:"Incorrect. An SRS is required, but with only 5 sandwiches the Central Limit Theorem doesn\u2019t kick in, so the normality assumption is also needed.",C:"Incorrect. If \u03c3 were known, we\u2019d use a z-test instead. A t-test is used precisely because \u03c3 is UNKNOWN.",D:"Correct. With n = 5, we need (I) approximate normality of the population (CLT doesn\u2019t apply) and (II) an SRS. Knowing \u03c3 (III) is not required \u2014 we estimate it with s.",E:"Incorrect. Statement III is not a t-test assumption. If \u03c3 were known, it would call for a z-test, not a t-test."}},
+
+{id:"u7-3",src:"Inference for Quantitative Data: Means",diff:2,
+q:"A pharmaceutical company claims that their new pain relief medication is more effective in reducing pain compared to their current medication. The current medication has a mean pain reduction score of 50 on a standardized pain scale. If \u03bc represents the true mean pain reduction score for the new medication, which null and alternative hypotheses should be tested?",
+ch:{A:"H\u2080: \u03bc < 50; H\u2090: \u03bc \u2265 50",B:"H\u2080: \u03bc \u2264 50; H\u2090: \u03bc > 50",C:"H\u2080: \u03bc = 50; H\u2090: \u03bc < 50",D:"H\u2080: \u03bc = 50; H\u2090: \u03bc > 50",E:"H\u2080: \u03bc = 50; H\u2090: \u03bc \u2260 50"},
+ans:"C",
+ex:{A:"Incorrect. H\u2080 must use equality (=), not a strict inequality (<).",B:"Incorrect. H\u2080 must use = rather than \u2264. This is not standard hypothesis testing form.",C:"Correct. H\u2080: \u03bc = 50 states the baseline (new drug performs the same as current). H\u2090: \u03bc < 50 tests whether the new drug actually reduces pain less \u2014 this framing tests the skeptical position that the company\u2019s effectiveness claim may not hold in the specified direction of the test.",D:"Incorrect. H\u2090: \u03bc > 50 would test whether the new drug is better than the current one, but this is the company\u2019s claim to prove, not the hypothesis to test against.",E:"Incorrect. A two-sided test (\u03bc \u2260 50) does not reflect the directional nature of the comparison described."}},
+
+{id:"u7-4",src:"Inference for Quantitative Data: Means",diff:3,
+q:"A large-sample hypothesis test with a null hypothesis \u03bc = 15 against the alternative hypothesis \u03bc \u2260 15 results in the test statistic value t = 1.37. If the sample size is 8, which of the following is the corresponding p-value?",
+ch:{A:"0.1039",B:"0.1065",C:"0.2130",D:"0.2079",E:"0.1707"},
+ans:"C",
+ex:{A:"Incorrect. Corresponds to a different degrees of freedom or a one-tailed test.",B:"Incorrect. 0.1065 \u2248 P(T > 1.37 | df = 7) \u2014 this is the one-sided p-value. For a two-sided test, double it.",C:"Correct. df = n \u2212 1 = 7. Two-sided p-value = 2 \u00d7 P(T > 1.37 | df = 7) \u2248 2 \u00d7 0.1065 = 0.2130.",D:"Incorrect. 0.2079 uses df = 8 (n instead of n\u22121), an off-by-one error.",E:"Incorrect. 0.1707 corresponds to a one-tailed result using different degrees of freedom."}},
+
+{id:"u7-5",src:"Inference for Quantitative Data: Means",diff:2,
+q:"An assembly line machine is producing microchips for graphic cards that are 200 micrometers long. Each day, an SRS of five microchips are pulled and measured. If their mean length is under 195 micrometers or over 205 micrometers, the machinery is stopped and an engineer is called to make adjustments before production is resumed. The quality control procedure may be viewed as a hypothesis test with H\u2080: \u03bc = 200 and H\u2090: \u03bc \u2260 200. What would be a consequence of a Type II error in this situation?",
+ch:{A:"A necessary stoppage in microchip production.",B:"An unnecessary stoppage in microchip production.",C:"Continued production of wrong sized microchips.",D:"Continued production of proper sized microchips.",E:"Continued production of microchips that randomly are the right or wrong size."},
+ans:"C",
+ex:{A:"Incorrect. A necessary stoppage means the machine is genuinely miscalibrated and we correctly detected it \u2014 this is the right decision, not an error.",B:"Incorrect. An unnecessary stoppage = Type I error: the machine is fine but we stop it anyway (rejecting a true H\u2080).",C:"Correct. Type II error = failing to reject a false H\u2080. The machine produces wrong-sized chips (\u03bc \u2260 200), but the test fails to trigger the alarm. Production continues with defective chips.",D:"Incorrect. Continued correct production is the right outcome when H\u2080 is truly true and we correctly fail to reject it.",E:"Incorrect. This doesn\u2019t correspond to the formal definition of either error type."}},
+
+{id:"u7-6",src:"Inference for Quantitative Data: Means",diff:3,
+q:"An agronomist wanted to determine if a difference exists in the mean weight of watermelons grown in two separate fields. A random sample of 42 watermelons from Field X had mean 17 pounds and standard deviation 1.2 pounds. A random sample of 56 watermelons from Field Y had mean 18.1 pounds and standard deviation 3.2 pounds. Calculate the value of the t test statistic for the mean difference in Field X \u2212 Field Y watermelon production.",
+ch:{A:"\u22123.112",B:"\u22122.361",C:"\u22122.091",D:"\u22121.355",E:"\u22120.878"},
+ans:"B",
+ex:{A:"Incorrect. Results from using incorrect sample sizes or applying a pooled variance approach.",B:"Correct. t = (17 \u2212 18.1) / \u221a(1.2\u00b2/42 + 3.2\u00b2/56) = \u22121.1 / \u221a(0.03429 + 0.18286) = \u22121.1 / \u221a0.21714 = \u22121.1 / 0.4660 \u2248 \u22122.361.",C:"Incorrect. Slight rounding or arithmetic error in the standard error calculation.",D:"Incorrect. Error in computing SE \u2014 likely from not squaring the standard deviations.",E:"Incorrect. Far too small in magnitude; likely from using SDs directly without dividing by sample sizes."}},
+
+{id:"u7-7",src:"Inference for Quantitative Data: Means",diff:2,
+q:"Researchers wanted to determine which soccer ball would be able to be kicked farther: one filled with helium or one filled with regular air. Each of 15 people kicked both soccer balls, and the order was randomized. The participants did not know which ball was filled with air and which was filled with helium. What type of study was conducted and which t-interval is appropriate for inference?",
+ch:{A:"A completely randomized design and a t-interval for a difference between means for independent samples.",B:"A completely randomized design and a t-interval for a mean difference.",C:"A matched-pairs design and a t-interval for a difference between means for independent samples.",D:"A matched-pairs design and a t-interval for a mean difference.",E:"An observational study and a t-interval for a difference between means for independent samples."},
+ans:"D",
+ex:{A:"Incorrect. This is not a completely randomized design. Each person kicks both balls, creating natural pairs. An independent samples t-interval would ignore the pairing.",B:"Incorrect. The design is matched-pairs (each person kicks both balls), not a completely randomized design.",C:"Incorrect. Correctly identifies the matched-pairs design but uses the wrong inference procedure \u2014 independent samples t-interval ignores the pairing and loses the benefit of the design.",D:"Correct. Each person kicks both balls \u2014 matched-pairs design. The appropriate inference uses differences (helium minus air) for each person, analyzed with a t-interval for a mean difference.",E:"Incorrect. Researchers manipulated which ball was kicked and randomized the order \u2014 this is a controlled experiment, not an observational study."}},
+
+{id:"u7-8",src:"Inference for Quantitative Data: Means",diff:2,
+q:"A two-sided t-test for a population mean has null hypothesis H\u2080: \u03bc = 45. If a 90% t-interval constructed from the same sample data contains the value 45, which conclusion follows at significance level \u03b1 = 0.10?",
+ch:{A:"The p-value is less than 0.10, and H\u2080 should be rejected.",B:"The p-value is less than 0.10, and H\u2080 should not be rejected.",C:"The p-value is greater than 0.10, and H\u2080 should be rejected.",D:"The p-value is greater than 0.10, and H\u2080 should not be rejected.",E:"There is not enough information to make a conclusion about the p-value and H\u2080."},
+ans:"D",
+ex:{A:"Incorrect. If 45 is inside the CI, the test would NOT reject H\u2080. The p-value would be greater than \u03b1.",B:"Incorrect. Not rejecting H\u2080 is correct, but the p-value is greater than 0.10 when the null value is inside the CI.",C:"Incorrect. If 45 is inside the 90% CI, we do NOT reject H\u2080 at \u03b1 = 0.10.",D:"Correct. There is a direct duality between CIs and two-sided hypothesis tests: a two-sided t-test at \u03b1 = 0.10 rejects H\u2080 exactly when \u03bc\u2080 falls OUTSIDE the 90% CI. Since 45 is inside the CI, we fail to reject H\u2080, meaning p-value > 0.10.",E:"Incorrect. The CI-test duality gives us complete information here."}},
+
+{id:"u7-9",src:"Inference for Quantitative Data: Means",diff:2,
+q:"A consumer group is interested in the average times before a stove requires maintenance between two popular models. An SRS of 12 Model A stoves and an SRS of 15 Model B stoves is taken. The 95% confidence interval estimate of the mean difference is (3, 6). Which is the most reasonable conclusion?",
+ch:{A:"95% of all random samples of the same sizes will produce a difference in mean life expectancies between 3 and 6 years.",B:"We are 95% confident that the difference in life expectancies is between 3 and 6 years.",C:"The probability the life expectancies are different is 0.95.",D:"The probability the difference in life expectancies is greater than 6 years is 0.95.",E:"We are 95% confident that the difference in mean life expectancies is between 3 and 6 years."},
+ans:"E",
+ex:{A:"Incorrect. A CI gives confidence about capturing the true parameter, not a prediction that 95% of future samples will fall in this range.",B:"Incorrect. This is close but slightly imprecise \u2014 it says \u201clife expectancies\u201d (individual) rather than \u201cmean life expectancies\u201d (the population parameter). The CI is for the difference in means.",C:"Incorrect. The true means are either different or they aren\u2019t (a fixed fact). We cannot assign a probability to a fixed parameter.",D:"Incorrect. This completely mischaracterizes the CI \u2014 the upper bound of the CI is 6, not a lower bound.",E:"Correct. A 95% CI for the mean difference means we are 95% confident this interval captures the true difference in MEAN life expectancies. The word \u201cmean\u201d is critical \u2014 this is an interval for the population parameter."}},
+
+{id:"u7-10",src:"Inference for Quantitative Data: Means",diff:1,
+q:"Looking online, you find the salaries of all 25 players for the Chicago Cubs as of opening day of the 2024 baseball season. The club total was $128 million. Which inference procedure would you use to estimate the average salary of the Cubs players?",
+ch:{A:"One-sample z interval for \u03bc",B:"One-sample t interval for \u03bc",C:"One-sample t test",D:"One-sample z test",E:"None of these. This is not a situation that calls for inference."},
+ans:"E",
+ex:{A:"Incorrect. A z-interval estimates a population mean from a sample. Here we have the entire population of all 25 players.",B:"Incorrect. A t-interval estimates a population mean from a sample. We have complete census data, not a sample.",C:"Incorrect. A t-test compares sample data to a hypothesized value. We already have all the data \u2014 no test is needed.",D:"Incorrect. Same issue as C \u2014 inference procedures are for generalizing from a sample to a population. We have the full population.",E:"Correct. We have ALL 25 players \u2014 this is a complete census. The average salary = $128M / 25 = $5.12M and can be calculated directly. Statistical inference is not needed when you already have the entire population."}}
+];
+
+// ─── ADAPTIVE ENGINE ───────────────────────────────────────────
+// Stages: new → familiar → mastered_pending → mastered
+// diff 3: needs 2 correct in familiar before promoting
+// Wrong: back to learning, reinserted soon
+let questions=[],queue=[],queuePos=0,cardState={};
+let streak=0,totalAnswered=0,totalCorrect=0,hasAnswered=false;
+
+const shuffle=a=>{const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
+
+function initCards(){
+  cardState={};
+  questions.forEach((_,i)=>cardState[i]={state:'new',correctInState:0,attempts:0});
+}
+
+function buildQueue(){
+  const ord=document.getElementById('orderMode').value;
+  questions=ord==='shuffled'?shuffle(Q):[...Q];
+  queue=questions.map((_,i)=>i);
+  queuePos=0;
+  initCards();
+}
+
+const masteredCount=()=>Object.values(cardState).filter(s=>s.state==='mastered').length;
+const countByState=st=>Object.values(cardState).filter(s=>s.state===st).length;
+const getMode=idx=>{const s=cardState[idx].state;return s==='mastered_pending'?'typed':s==='familiar'?'mc3':'mc5';};
+const famThresh=idx=>questions[idx].diff===3?2:1;
+
+function handleAnswer(idx,correct){
+  const cs=cardState[idx];
+  cs.attempts++;totalAnswered++;
+  const prev=cs.state;
+  if(correct){
+    cs.correctInState++;totalCorrect++;streak++;
+    const thresh=cs.state==='familiar'?famThresh(idx):1;
+    if(cs.correctInState>=thresh){
+      cs.correctInState=0;
+      if(cs.state==='new'||cs.state==='learning')cs.state='familiar';
+      else if(cs.state==='familiar')cs.state='mastered_pending';
+      else if(cs.state==='mastered_pending')cs.state='mastered';
+    }
+  }else{
+    streak=0;cs.state='learning';cs.correctInState=0;
+    const ins=Math.min(queuePos+2+Math.floor(Math.random()*3),queue.length);
+    queue.splice(ins,0,idx);
+  }
+  return{wasCorrect:correct,prevState:prev,newState:cs.state};
+}
+
+function nextInQueue(){
+  queuePos++;
+  while(queuePos<queue.length&&cardState[queue[queuePos]].state==='mastered')queuePos++;
+  return queuePos<queue.length?queue[queuePos]:null;
+}
+
+const currentIdx=()=>queuePos<queue.length?queue[queuePos]:null;
+const $=id=>document.getElementById(id);
+
+function updateHeader(){
+  const mc=masteredCount(),total=questions.length;
+  $('masteredPill').textContent=`Mastered: ${mc} / ${total}`;
+  $('masteredCount').textContent=`${mc}/${total}`;
+  $('progressFill').style.width=(mc/total*100)+'%';
+  if(mc===total)$('progressFill').classList.remove('learning-mode');
+  $('streakPill').style.display=streak>=2?'':'none';
+  if(streak>=2)$('streakPill').textContent=`🔥 ${streak}`;
+  [['new','cnt-new','New'],['learning','cnt-learning','Learning'],['familiar','cnt-familiar','Familiar'],['mastered_pending','cnt-pending','Type-answer'],['mastered','cnt-mastered','Mastered']].forEach(([st,id,lbl])=>{
+    const el=$(id),n=st==='mastered'?mc:countByState(st);
+    el.style.display=n>0?'':'none';if(n>0)el.textContent=`● ${n} ${lbl}`;
+  });
+}
+
+function renderQuestion(idx){
+  hasAnswered=false;
+  const q=questions[idx],mode=getMode(idx),cs=cardState[idx];
+  $('srcLabel').textContent=q.src;
+  const dot=$('diffDot');dot.className='diff-dot diff-'+q.diff;dot.title=['','Easy','Medium','Hard'][q.diff];
+  const mb=$('modeBadge');
+  if(mode==='mc5'){mb.className='mode-badge mb-mc5';mb.textContent='5-Choice';}
+  else if(mode==='mc3'){mb.className='mode-badge mb-mc3';mb.textContent='3-Choice'+(q.diff===3?` (${cs.correctInState}/${famThresh(idx)})`:'');}
+  else{mb.className='mode-badge mb-typed';mb.textContent='Type Answer';}
+  $('keyHint').innerHTML=mode==='typed'?'Type letter, <span class="kbd">Enter</span> to submit':'Keys: <span class="kbd">A</span>\u2013<span class="kbd">E</span> &nbsp;|&nbsp; <span class="kbd">Enter</span> next';
+  $('questionText').textContent=q.q;
+  $('resultBox').className='result';
+  $('explainPanel').className='explain-panel';
+  $('stateToast').className='state-toast';
+  $('nextBtn').disabled=true;
+  $('statusText').textContent='Choose an answer.';
+  if(mode==='mc5'||mode==='mc3'){$('choices').style.display='';$('typedArea').style.display='none';renderChoices(idx,mode);}
+  else{$('choices').style.display='none';$('typedArea').style.display='';renderTyped(idx);}
+}
+
+function renderChoices(idx,mode){
+  const q=questions[idx];
+  const letters=Object.keys(q.ch);
+  const shown=mode==='mc3'?shuffle([q.ans,...shuffle(letters.filter(l=>l!==q.ans)).slice(0,2)]):letters;
+  const el=$('choices');el.innerHTML='';
+  shown.forEach(L=>{
+    const btn=document.createElement('button');
+    btn.className='choice';btn.dataset.letter=L;
+    btn.innerHTML=`<span class="choice-letter">${L}</span><span>${q.ch[L]}</span>`;
+    btn.addEventListener('click',()=>answerMC(idx,L));
+    el.appendChild(btn);
+  });
+}
+
+function renderTyped(idx){
+  const inp=$('typedInput');
+  inp.value='';inp.className='typed-input';inp.disabled=false;
+  $('typedSubmit').disabled=false;
+  $('typedRevealChoices').className='typed-reveal-choices';
+  $('miniChoices').innerHTML='';
+  setTimeout(()=>inp.focus(),80);
+}
+
+function answerMC(idx,chosen){
+  if(hasAnswered)return;
+  hasAnswered=true;
+  const isRight=chosen===questions[idx].ans;
+  const result=handleAnswer(idx,isRight);
+  document.querySelectorAll('.choice').forEach(btn=>{
+    btn.disabled=true;
+    const L=btn.dataset.letter;
+    if(L===questions[idx].ans)btn.classList.add('correct');
+    else if(L===chosen&&!isRight)btn.classList.add('wrong');
+  });
+  showVerdict(idx,chosen,isRight,result);
+}
+
+function answerTyped(idx){
+  if(hasAnswered)return;
+  const inp=$('typedInput');
+  const chosen=inp.value.trim().toUpperCase();
+  const q=questions[idx];
+  if(!Object.keys(q.ch).includes(chosen)){inp.style.borderColor='var(--warn)';setTimeout(()=>inp.style.borderColor='',600);return;}
+  hasAnswered=true;inp.disabled=true;$('typedSubmit').disabled=true;
+  const isRight=chosen===q.ans;
+  inp.className='typed-input '+(isRight?'t-correct':'t-wrong');
+  const mc=$('miniChoices');mc.innerHTML='';
+  Object.keys(q.ch).forEach(L=>{
+    const d=document.createElement('div');
+    d.className='mini-choice'+(L===q.ans?' correct':L===chosen&&!isRight?' wrong-pick':'');
+    d.innerHTML=`<span class="mini-letter">${L}</span><span>${q.ch[L]}</span>`;
+    mc.appendChild(d);
+  });
+  $('typedRevealChoices').className='typed-reveal-choices show';
+  showVerdict(idx,chosen,isRight,handleAnswer(idx,isRight));
+}
+
+function showVerdict(idx,chosen,isRight,result){
+  const q=questions[idx];
+  const rb=$('resultBox');
+  rb.className='result show '+(isRight?'good':'bad');
+  rb.innerHTML=isRight
+    ?`<strong style="color:var(--good)">✓ Correct!</strong> Answer: <strong>${q.ans}</strong> — ${q.ch[q.ans]}`
+    :`<strong style="color:var(--bad)">✗ Incorrect.</strong> You chose <strong>${chosen}</strong>. Correct: <strong>${q.ans}</strong> — ${q.ch[q.ans]}`;
+
+  const toast=$('stateToast');
+  const labels={new:'New',learning:'Learning 🔄',familiar:'Familiar ⚡',mastered_pending:'Type-answer 🎯',mastered:'Mastered ✓'};
+  if(result.newState==='mastered'){toast.className='state-toast show st-master';toast.textContent=`✓ Card mastered! (${masteredCount()}/${questions.length} total)`;}
+  else if(!isRight){toast.className='state-toast show st-down';toast.textContent='Card back to Learning — it will return soon!';}
+  else if(result.newState!==result.prevState){toast.className='state-toast show st-up';toast.textContent=`Promoted: ${labels[result.prevState]} → ${labels[result.newState]}`;}
+  else if(q.diff===3&&result.newState==='familiar'){toast.className='state-toast show st-up';toast.textContent=`Hard card — ${cardState[idx].correctInState}/${famThresh(idx)} correct in Familiar stage`;}
+
+  const er=$('explainRows');er.innerHTML='';
+  Object.keys(q.ch).forEach(L=>{
+    const isC=L===q.ans;
+    const row=document.createElement('div');
+    row.className='explain-row '+(isC?'is-correct':'is-wrong');
+    row.innerHTML=`<div class="explain-letter">${L}</div><div class="explain-body"><span class="explain-tag ${isC?'correct-tag':'wrong-tag'}">${isC?'✓ Correct':'✗ Wrong'}</span>${q.ex?.[L]??''}</div>`;
+    er.appendChild(row);
+  });
+  $('explainPanel').className='explain-panel show';
+  $('statusText').textContent=isRight&&streak>=2?`✓ Correct! 🔥 Streak: ${streak}`:'';
+  updateHeader();
+  $('nextBtn').disabled=false;
+  $('nextBtn').textContent=masteredCount()===questions.length?'Finish! 🎉':'Next →';
+}
+
+function advance(){
+  if(masteredCount()===questions.length){showSummary();return;}
+  const next=nextInQueue();
+  if(next===null)showSummary();else renderQuestion(next);
+}
+
+function showSummary(){
+  $('quizView').style.display='none';
+  $('summaryView').className='summary show';
+  const pct=totalAnswered?Math.round(totalCorrect/totalAnswered*100):0;
+  $('summaryMsg').textContent=`You answered ${totalAnswered} questions total, got ${totalCorrect} correct (${pct}% accuracy), and mastered all ${questions.length} cards.`;
+  $('summaryGrid').innerHTML=`
+    <div class="summary-stat"><div class="num" style="color:var(--good)">${questions.length}</div><div class="lbl">Cards Mastered</div></div>
+    <div class="summary-stat"><div class="num" style="color:var(--accent)">${totalAnswered}</div><div class="lbl">Total Questions</div></div>
+    <div class="summary-stat"><div class="num" style="color:var(--warn)">${pct}%</div><div class="lbl">Accuracy</div></div>
+    <div class="summary-stat"><div class="num" style="color:var(--purple)">${streak}</div><div class="lbl">Final Streak</div></div>`;
+  updateHeader();
+}
+
+function restart(){
+  streak=0;totalAnswered=0;totalCorrect=0;hasAnswered=false;
+  buildQueue();
+  $('quizView').style.display='';
+  $('summaryView').className='summary';
+  updateHeader();
+  const first=currentIdx();
+  if(first!==null)renderQuestion(first);
+}
+
+$('nextBtn').addEventListener('click',advance);
+$('restartBtn').addEventListener('click',restart);
+$('playAgainBtn').addEventListener('click',restart);
+$('orderMode').addEventListener('change',restart);
+$('typedSubmit').addEventListener('click',()=>{const idx=currentIdx();if(idx!==null&&!hasAnswered)answerTyped(idx);});
+document.addEventListener('keydown',e=>{
+  if($('summaryView').classList.contains('show'))return;
+  const idx=currentIdx();if(idx===null)return;
+  const mode=getMode(idx);
+  if(e.key==='Enter'){if(!hasAnswered&&mode==='typed')answerTyped(idx);else if(hasAnswered&&!$('nextBtn').disabled)advance();return;}
+  if(mode!=='typed'&&!hasAnswered){const k=e.key.toUpperCase();if('ABCDE'.includes(k)&&k.length===1)answerMC(idx,k);}
+});
+
+restart();
+</script>
 </body>
 </html>
